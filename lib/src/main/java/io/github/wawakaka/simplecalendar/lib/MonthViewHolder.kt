@@ -10,9 +10,10 @@ import kotlinx.android.synthetic.main.day.view.*
 import kotlinx.android.synthetic.main.month.view.*
 import java.util.*
 
-internal class SimpleCalendarViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+internal class MonthViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     private val viewList: MutableList<View> = mutableListOf()
+    private val presenter by lazy { MonthPresenter }
 
     fun bindViews(dates: MutableList<Date>) {
         setDays(dates)
@@ -49,7 +50,7 @@ internal class SimpleCalendarViewHolder(itemView: View) : RecyclerView.ViewHolde
 
                 clone(itemView.root_view)
 
-                when (getRow(position)) {
+                when (presenter.getRow(position)) {
                     1 -> {
                         connect(
                             view.id,
@@ -62,13 +63,13 @@ internal class SimpleCalendarViewHolder(itemView: View) : RecyclerView.ViewHolde
                         connect(
                             view.id,
                             ConstraintSet.TOP,
-                            viewList[getTopItemPosition(position)].id,
+                            viewList[presenter.getTopItemPosition(position)].id,
                             ConstraintSet.BOTTOM
                         )
                     }
                 }
 
-                when (getCoulomb(position)) {
+                when (presenter.getCoulomb(position)) {
                     1 -> {
                         connect(
                             view.id,
@@ -121,40 +122,11 @@ internal class SimpleCalendarViewHolder(itemView: View) : RecyclerView.ViewHolde
         val view = LayoutInflater.from(itemView.context).inflate(R.layout.day, null)
         view.text_day.text = date.transformDate()
         view.container_day.setOnClickListener {
+            //            todo do something
             Log.e("createView", "$date")
         }
         view.id = ViewIdGenerator.generateViewId()
         viewList.add(view)
-    }
-
-    private fun getCoulomb(position: Int): Int {
-        return when {
-            position % 7 == 0 -> 3
-            position % 7 == 1 -> 1
-            else -> 2
-        }
-    }
-
-    private fun getRow(position: Int): Int {
-        return when {
-            (position.toFloat() / 7.0f) <= 1.0f -> 1
-            (position.toFloat() / 7.0f) <= 2.0f -> 2
-            (position.toFloat() / 7.0f) <= 3.0f -> 3
-            (position.toFloat() / 7.0f) <= 4.0f -> 4
-            (position.toFloat() / 7.0f) <= 5.0f -> 5
-            else -> 6
-        }
-    }
-
-    private fun getTopItemPosition(position: Int): Int {
-        return when {
-            position >= 8 -> {
-                position - 8
-            }
-            else -> {
-                0
-            }
-        }
     }
 
 }
