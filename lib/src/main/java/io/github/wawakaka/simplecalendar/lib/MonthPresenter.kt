@@ -1,9 +1,9 @@
 package io.github.wawakaka.simplecalendar.lib
 
-import android.icu.util.Calendar
-import android.icu.util.ULocale
-import android.os.Build
 import io.github.wawakaka.simplecalendar.lib.SimpleConstant.MAX_NUMBER_OF_DATE
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.temporal.WeekFields
 import java.util.*
 
 internal object MonthPresenter {
@@ -38,148 +38,58 @@ internal object MonthPresenter {
         }
     }
 
-    fun getNextMonthDate(date: Date, currentListSize: Int): MutableList<Date> {
+    fun getNextMonthDate(date: LocalDate, currentListSize: Int): MutableList<LocalDate> {
         val numberOfDays = MAX_NUMBER_OF_DATE - currentListSize
         return getNextMonthDateList(date, numberOfDays)
     }
 
-    fun getLastMonthDate(date: Date): MutableList<Date> {
-        return if (getFirstDayOfTheWeek() == Calendar.SUNDAY) {
-            when (getFirstDayOfTheMonthPosition(date)) {
-                Calendar.SUNDAY -> mutableListOf()
-                Calendar.MONDAY -> getLastMonthDateList(1, date)
-                Calendar.TUESDAY -> getLastMonthDateList(2, date)
-                Calendar.WEDNESDAY -> getLastMonthDateList(3, date)
-                Calendar.THURSDAY -> getLastMonthDateList(4, date)
-                Calendar.FRIDAY -> getLastMonthDateList(5, date)
+    fun getPreviousMonthDate(date: LocalDate): MutableList<LocalDate> {
+        return if (getFirstDayOfTheWeek() == DayOfWeek.SUNDAY.ordinal) {
+            when (date.dayOfWeek.ordinal) {
+                DayOfWeek.SUNDAY.ordinal -> mutableListOf()
+                DayOfWeek.MONDAY.ordinal -> getLastMonthDateList(1, date)
+                DayOfWeek.TUESDAY.ordinal -> getLastMonthDateList(2, date)
+                DayOfWeek.WEDNESDAY.ordinal -> getLastMonthDateList(3, date)
+                DayOfWeek.THURSDAY.ordinal -> getLastMonthDateList(4, date)
+                DayOfWeek.FRIDAY.ordinal -> getLastMonthDateList(5, date)
                 else -> getLastMonthDateList(6, date)
             }
         } else {
-            when (getFirstDayOfTheMonthPosition(date)) {
-                Calendar.MONDAY -> mutableListOf()
-                Calendar.TUESDAY -> getLastMonthDateList(1, date)
-                Calendar.WEDNESDAY -> getLastMonthDateList(2, date)
-                Calendar.THURSDAY -> getLastMonthDateList(3, date)
-                Calendar.FRIDAY -> getLastMonthDateList(4, date)
-                Calendar.SATURDAY -> getLastMonthDateList(5, date)
+            when (date.dayOfWeek.ordinal) {
+                DayOfWeek.MONDAY.ordinal -> mutableListOf()
+                DayOfWeek.TUESDAY.ordinal -> getLastMonthDateList(1, date)
+                DayOfWeek.WEDNESDAY.ordinal -> getLastMonthDateList(2, date)
+                DayOfWeek.THURSDAY.ordinal -> getLastMonthDateList(3, date)
+                DayOfWeek.FRIDAY.ordinal -> getLastMonthDateList(4, date)
+                DayOfWeek.SATURDAY.ordinal -> getLastMonthDateList(5, date)
                 else -> getLastMonthDateList(6, date)
             }
         }
     }
 
-    private fun getFirstDayOfTheMonthPosition(date: Date): Any {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val calendar = Calendar.getInstance(ULocale.getDefault())
-            calendar.run {
-                time = date
-                set(Calendar.HOUR_OF_DAY, 0)
-                get(Calendar.DAY_OF_WEEK)
-            }
-        } else {
-            val calendar = java.util.Calendar.getInstance(Locale.getDefault())
-            calendar.run {
-                time = date
-                set(java.util.Calendar.HOUR_OF_DAY, 0)
-                get(java.util.Calendar.DAY_OF_WEEK)
-            }
-        }
-    }
-
-    private fun getLastMonthDateList(numberOfDays: Int, date: Date): MutableList<Date> {
-        val listOfDate = mutableListOf<Date>()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val calendar = Calendar.getInstance(ULocale.getDefault())
-            calendar.run {
-                time = date
-                add(Calendar.MONTH, -1)
-                set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH))
-            }
-            for (index in numberOfDays..1) {
-                listOfDate.add(calendar.time)
-                calendar.run {
-                    add(Calendar.DAY_OF_MONTH, 1)
-                }
-            }
-        } else {
-            val calendar = java.util.Calendar.getInstance(Locale.getDefault())
-            calendar.run {
-                time = date
-                add(java.util.Calendar.MONTH, -1)
-                set(
-                    java.util.Calendar.DAY_OF_MONTH,
-                    getActualMaximum(java.util.Calendar.DAY_OF_MONTH)
-                )
-            }
-            for (index in numberOfDays..1) {
-                listOfDate.add(calendar.time)
-                calendar.run {
-                    add(java.util.Calendar.DAY_OF_MONTH, -1)
-                }
-            }
+    private fun getLastMonthDateList(numberOfDays: Int, date: LocalDate): MutableList<LocalDate> {
+        val listOfDate = mutableListOf<LocalDate>()
+        for (index in numberOfDays downTo 1) {
+            val day = date
+                .minusMonths(1)
+                .withDayOfMonth(date.minusMonths(1).lengthOfMonth())
+            if (index == numberOfDays) listOfDate.add(day)
+            else listOfDate.add(day.minusDays(index.toLong()))
         }
         return listOfDate
     }
 
-    private fun getNextMonthDateList(date: Date, numberOfDays: Int): MutableList<Date> {
-        val listOfDate = mutableListOf<Date>()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val calendar = Calendar.getInstance(ULocale.getDefault())
-            calendar.run {
-                time = date
-                add(Calendar.MONTH, 1)
-                set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH))
-            }
-            for (index in 1..numberOfDays) {
-                listOfDate.add(calendar.time)
-                calendar.run {
-                    add(Calendar.DAY_OF_MONTH, 1)
-                }
-            }
-        } else {
-            val calendar = java.util.Calendar.getInstance(Locale.getDefault())
-            calendar.run {
-                time = date
-                add(java.util.Calendar.MONTH, 1)
-                set(
-                    java.util.Calendar.DAY_OF_MONTH,
-                    getActualMaximum(java.util.Calendar.DAY_OF_MONTH)
-                )
-            }
-            for (index in 1..numberOfDays) {
-                listOfDate.add(calendar.time)
-                calendar.run {
-                    add(java.util.Calendar.DAY_OF_MONTH, 1)
-                }
-            }
+    private fun getNextMonthDateList(date: LocalDate, numberOfDays: Int): MutableList<LocalDate> {
+        val listOfDate = mutableListOf<LocalDate>()
+        for (index in 0 until numberOfDays) {
+            listOfDate.add(date.plusMonths(1).withDayOfMonth(1).plusDays(index.toLong()))
         }
         return listOfDate
     }
 
     private fun getFirstDayOfTheWeek(): Int {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Calendar.getInstance(ULocale.getDefault()).firstDayOfWeek
-        } else {
-            java.util.Calendar.getInstance(Locale.getDefault()).firstDayOfWeek
-        }
-    }
-
-    private fun getLastDayOfTheMonthPosition(date: Date): Int {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val calendar = Calendar.getInstance(ULocale.getDefault())
-            calendar.run {
-                time = date
-                set(Calendar.HOUR_OF_DAY, 0)
-                add(Calendar.MONTH, 1)
-                get(Calendar.DAY_OF_WEEK)
-            }
-        } else {
-            val calendar = java.util.Calendar.getInstance(Locale.getDefault())
-            calendar.run {
-                time = date
-                set(java.util.Calendar.HOUR_OF_DAY, 0)
-                add(java.util.Calendar.MONTH, 1)
-                get(java.util.Calendar.DAY_OF_WEEK)
-            }
-        }
+        val now = LocalDate.now().withDayOfMonth(1)
+        val fieldISO = WeekFields.of(Locale.getDefault()).dayOfWeek()
+        return now.with(fieldISO, 1).dayOfWeek.ordinal
     }
 }
