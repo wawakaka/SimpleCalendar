@@ -1,9 +1,10 @@
-package io.github.wawakaka.simplecalendar.lib
+package io.github.wawakaka.simplecalendar.lib.view
 
-import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.recyclerview.widget.RecyclerView
 import io.github.wawakaka.simplecalendar.lib.data.SimpleMonthData
+import io.github.wawakaka.simplecalendar.lib.utils.LocalDateUtil
 
 internal class SimpleCalendarAdapter : RecyclerView.Adapter<MonthViewHolder>() {
 
@@ -22,10 +23,7 @@ internal class SimpleCalendarAdapter : RecyclerView.Adapter<MonthViewHolder>() {
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MonthViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(
-            R.layout.month, parent, false
-        )
-        return MonthViewHolder(view)
+        return MonthViewHolder(FrameLayout(parent.context))
     }
 
     override fun getItemCount(): Int {
@@ -38,10 +36,17 @@ internal class SimpleCalendarAdapter : RecyclerView.Adapter<MonthViewHolder>() {
         }
     }
 
-    fun next() {
-    }
-
-    fun previous() {
-
+    fun loadNextYear() {
+        for (index in 1..12) {
+            data.add(
+                SimpleMonthData(
+                    days = LocalDateUtil.days(
+                        data.size + 1,
+                        index
+                    ).toMutableList()
+                )
+            )
+            notifyItemInserted(data.size)
+        }
     }
 }
