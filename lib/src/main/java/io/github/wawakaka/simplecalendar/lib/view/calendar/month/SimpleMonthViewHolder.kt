@@ -16,8 +16,8 @@ import java.util.*
 internal class SimpleMonthViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     fun bindViews(data: SimpleMonthData) {
-        setYear(data.days[21])
-        setMonthName(data.days[21])
+        setYear(data.days[SimpleConstant.MAGIC_INDEX])
+        setMonthName(data.days[SimpleConstant.MAGIC_INDEX])
         setMonth(data)
     }
 

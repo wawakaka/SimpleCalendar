@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import io.github.wawakaka.simplecalendar.lib.R
 import io.github.wawakaka.simplecalendar.lib.data.SimpleMonthData
 import io.github.wawakaka.simplecalendar.lib.utils.LocalDateUtil
+import io.github.wawakaka.simplecalendar.lib.utils.SimpleConstant
 import org.threeten.bp.LocalDate
 import org.threeten.bp.ZoneId
 
@@ -48,7 +49,7 @@ internal class SimpleMonthAdapter : RecyclerView.Adapter<SimpleMonthViewHolder>(
     }
 
     fun loadNextYear() {
-        val year = data.last().days[21].plusYears(1).year
+        val year = data.last().days[SimpleConstant.MAGIC_INDEX].plusYears(1).year
         for (index in 1..12) {
             data.add(
                 SimpleMonthData(
@@ -65,7 +66,7 @@ internal class SimpleMonthAdapter : RecyclerView.Adapter<SimpleMonthViewHolder>(
     }
 
     fun loadPreviousYear() {
-        val year = data[0].days[21].minusYears(1).year
+        val year = data[0].days[SimpleConstant.MAGIC_INDEX].minusYears(1).year
         for (index in 12 downTo 1) {
             data.add(
                 0,
