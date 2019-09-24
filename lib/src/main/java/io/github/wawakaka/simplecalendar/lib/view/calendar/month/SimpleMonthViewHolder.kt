@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import io.github.wawakaka.simplecalendar.lib.data.SimpleDayData
+import io.github.wawakaka.simplecalendar.lib.data.SimpleMonthData
 import io.github.wawakaka.simplecalendar.lib.utils.SimpleConstant
 import io.github.wawakaka.simplecalendar.lib.view.calendar.month.day.SimpleDayAdapter
 import kotlinx.android.synthetic.main.simple_month_view.view.*
@@ -14,10 +15,10 @@ import java.util.*
 
 internal class SimpleMonthViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-    fun bindViews(dates: MutableList<LocalDate>) {
-        setYear(dates[21])
-        setMonthName(dates[21])
-        setMonth(dates)
+    fun bindViews(data: SimpleMonthData) {
+        setYear(data.days[21])
+        setMonthName(data.days[21])
+        setMonth(data)
     }
 
     private fun setYear(date: LocalDate) {
@@ -36,11 +37,11 @@ internal class SimpleMonthViewHolder(itemView: View) : RecyclerView.ViewHolder(i
         }
     }
 
-    private fun setMonth(dates: MutableList<LocalDate>) {
-        val data = dates.map { SimpleDayData(day = it) }
+    private fun setMonth(data: SimpleMonthData) {
+        val simpleDayData = data.days.map { SimpleDayData(month = data.month, day = it) }
         itemView.recycler_month.apply {
             layoutManager = GridLayoutManager(context, SimpleConstant.NUMBER_OF_DAYS_IN_ONE_WEEK)
-            adapter = SimpleDayAdapter(data).apply {
+            adapter = SimpleDayAdapter(simpleDayData).apply {
                 clickListener =
                     { Toast.makeText(context, "item clicked", Toast.LENGTH_SHORT).show() }
             }

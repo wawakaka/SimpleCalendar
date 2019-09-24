@@ -44,7 +44,7 @@ internal class SimpleMonthAdapter : RecyclerView.Adapter<SimpleMonthViewHolder>(
     }
 
     override fun onBindViewHolder(holder: SimpleMonthViewHolder, position: Int) {
-        holder.bindViews(data[position].days)
+        holder.bindViews(data[position])
     }
 
     fun loadNextYear() {

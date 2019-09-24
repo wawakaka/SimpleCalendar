@@ -33,6 +33,6 @@ internal class SimpleDayAdapter(private val data: List<SimpleDayData>) :
     }
 
     override fun onBindViewHolder(holder: SimpleDayViewHolder, position: Int) {
-        holder.bindViews(data[position].day, clickListener)
+        holder.bindViews(data[position], clickListener)
     }
 }
