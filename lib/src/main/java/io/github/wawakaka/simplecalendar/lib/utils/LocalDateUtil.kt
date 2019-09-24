@@ -4,6 +4,7 @@ import android.util.Log
 import io.github.wawakaka.simplecalendar.lib.utils.SimpleConstant.MAX_NUMBER_OF_DATE
 import org.threeten.bp.DayOfWeek
 import org.threeten.bp.LocalDate
+import org.threeten.bp.Month
 import org.threeten.bp.ZoneId
 import org.threeten.bp.temporal.WeekFields
 import java.util.*
@@ -16,24 +17,19 @@ internal object LocalDateUtil {
             LocalDate.now(ZoneId.systemDefault())
                 .withDayOfMonth(1)
                 .withMonth(month)
-                .withYear(
-                    LocalDate.now(ZoneId.systemDefault())
-                        .plusYears(year.toLong())
-                        .year
-                )
-        val previousMonthDateList =
-            getLastMonthDate(day)
-        val nextMonthDateList =
-            getNextMonthDate(
-                day,
-                result.size
-            )
+                .withYear(year)
+        val previousMonthDateList = getLastMonthDate(day)
 
         result.addAll(previousMonthDateList)
 
         for (index in day.dayOfMonth - 1 until day.lengthOfMonth()) {
             result.add(day.plusDays(index.toLong()))
         }
+
+        val nextMonthDateList = getNextMonthDate(
+            day,
+            result.size
+        )
 
         result.addAll(nextMonthDateList)
 
@@ -45,19 +41,18 @@ internal object LocalDateUtil {
         val day = LocalDate.now(ZoneId.systemDefault())
             .withDayOfMonth(1)
             .withMonth(month)
-        val previousMonthDateList =
-            getLastMonthDate(day)
-        val nextMonthDateList =
-            getNextMonthDate(
-                day,
-                result.size
-            )
+        val previousMonthDateList = getLastMonthDate(day)
 
         result.addAll(previousMonthDateList)
 
         for (index in day.dayOfMonth - 1 until day.lengthOfMonth()) {
             result.add(day.plusDays(index.toLong()))
         }
+
+        val nextMonthDateList = getNextMonthDate(
+            day,
+            result.size
+        )
 
         result.addAll(nextMonthDateList)
 
@@ -159,5 +154,22 @@ internal object LocalDateUtil {
             listOfDate.add(date.plusMonths(1).withDayOfMonth(1).plusDays(index.toLong()))
         }
         return listOfDate
+    }
+
+    fun getMonth(month: Int): Month {
+        return when (month) {
+            1 -> Month.JANUARY
+            2 -> Month.FEBRUARY
+            3 -> Month.MARCH
+            4 -> Month.APRIL
+            5 -> Month.MAY
+            6 -> Month.JUNE
+            7 -> Month.JULY
+            8 -> Month.AUGUST
+            9 -> Month.SEPTEMBER
+            10 -> Month.OCTOBER
+            11 -> Month.NOVEMBER
+            else -> Month.DECEMBER
+        }
     }
 }

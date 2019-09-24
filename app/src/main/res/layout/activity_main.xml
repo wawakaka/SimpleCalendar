@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <io.github.wawakaka.simplecalendar.lib.view.SimpleCalendarView
+    <io.github.wawakaka.simplecalendar.lib.view.calendar.SimpleCalendarView
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
