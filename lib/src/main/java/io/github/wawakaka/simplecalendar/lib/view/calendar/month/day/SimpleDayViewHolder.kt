@@ -28,7 +28,7 @@ internal class SimpleDayViewHolder(itemView: View) : RecyclerView.ViewHolder(ite
 
     private fun setDay(data: SimpleDayData) {
         itemView.text_day.text = try {
-            data.day.format(DateTimeFormatter.ofPattern("dd"))
+            data.day.format(DateTimeFormatter.ofPattern("d"))
         } catch (e: IndexOutOfBoundsException) {
             "xx"
         }
