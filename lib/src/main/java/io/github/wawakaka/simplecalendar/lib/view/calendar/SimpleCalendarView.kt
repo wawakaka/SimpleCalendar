@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.jakewharton.threetenabp.AndroidThreeTen
 import io.github.wawakaka.simplecalendar.lib.R
 import io.github.wawakaka.simplecalendar.lib.utils.EndlessRecyclerViewScrollListener
 import io.github.wawakaka.simplecalendar.lib.view.calendar.month.SimpleMonthAdapter
@@ -18,6 +19,7 @@ class SimpleCalendarView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
 ) : FrameLayout(context, attrs) {
 
+    var clickListener: (() -> Unit)? = null
     private lateinit var adapter: SimpleMonthAdapter
     private lateinit var linearLayoutManager: LinearLayoutManager
     private lateinit var scrollListener: EndlessRecyclerViewScrollListener
@@ -26,7 +28,7 @@ class SimpleCalendarView @JvmOverloads constructor(
         val view = LayoutInflater
             .from(context)
             .inflate(R.layout.simple_calendar_view, this, true)
-
+        AndroidThreeTen.init(context)
         getViewRef(view)
     }
 
@@ -35,7 +37,9 @@ class SimpleCalendarView @JvmOverloads constructor(
     }
 
     private fun setLayoutManagerAndAdapter(view: View) {
-        adapter = SimpleMonthAdapter()
+        adapter = SimpleMonthAdapter().apply {
+            clickListener = this@SimpleCalendarView.clickListener
+        }
         linearLayoutManager = LinearLayoutManager(
             view.context, LinearLayoutManager.HORIZONTAL, false
         )

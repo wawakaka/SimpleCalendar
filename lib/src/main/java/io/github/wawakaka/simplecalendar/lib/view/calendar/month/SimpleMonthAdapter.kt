@@ -12,7 +12,8 @@ import org.threeten.bp.ZoneId
 
 internal class SimpleMonthAdapter : RecyclerView.Adapter<SimpleMonthViewHolder>() {
 
-    private var data = mutableListOf<SimpleMonthData>()
+    var data = mutableListOf<SimpleMonthData>()
+    var clickListener: (() -> Unit)? = null
 
     init {
         setHasStableIds(true)
@@ -45,7 +46,7 @@ internal class SimpleMonthAdapter : RecyclerView.Adapter<SimpleMonthViewHolder>(
     }
 
     override fun onBindViewHolder(holder: SimpleMonthViewHolder, position: Int) {
-        holder.bindViews(data[position])
+        holder.bindViews(data = data[position], clickListener = clickListener)
     }
 
     fun loadNextYear() {

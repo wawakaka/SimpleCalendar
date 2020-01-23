@@ -1,4 +1,4 @@
-package io.github.wawakaka.simplecalendar.lib.view.calendar.month.day
+package io.github.wawakaka.simplecalendar.lib.view.calendar.day
 
 import android.view.View
 import android.widget.FrameLayout
@@ -9,6 +9,7 @@ import io.github.wawakaka.simplecalendar.lib.data.SimpleDayData
 import io.github.wawakaka.simplecalendar.lib.utils.ViewUtil
 import kotlinx.android.synthetic.main.simple_day_view.view.*
 import org.threeten.bp.format.DateTimeFormatter
+import java.lang.Exception
 
 internal class SimpleDayViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -19,17 +20,19 @@ internal class SimpleDayViewHolder(itemView: View) : RecyclerView.ViewHolder(ite
     }
 
     private fun setContainerSize() {
+        val dayBoxSize = ViewUtil.getDayBoxSize(itemView.context)
         val layoutParams = FrameLayout.LayoutParams(
-            ViewUtil.getDayBoxSize(itemView.context),
-            ViewUtil.getDayBoxSize(itemView.context)
+            dayBoxSize,
+            dayBoxSize
         )
         itemView.text_day.layoutParams = layoutParams
     }
 
     private fun setDay(data: SimpleDayData) {
+        // todo try to remember why i put try catch here
         itemView.text_day.text = try {
             data.day.format(DateTimeFormatter.ofPattern("d"))
-        } catch (e: IndexOutOfBoundsException) {
+        } catch (e: Exception) {
             "xx"
         }
         itemView.text_day.setTextColor(

@@ -1,13 +1,12 @@
 package io.github.wawakaka.simplecalendar.lib.view.calendar.month
 
 import android.view.View
-import android.widget.Toast
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import io.github.wawakaka.simplecalendar.lib.data.SimpleDayData
 import io.github.wawakaka.simplecalendar.lib.data.SimpleMonthData
 import io.github.wawakaka.simplecalendar.lib.utils.SimpleConstant
-import io.github.wawakaka.simplecalendar.lib.view.calendar.month.day.SimpleDayAdapter
+import io.github.wawakaka.simplecalendar.lib.view.calendar.day.SimpleDayAdapter
 import kotlinx.android.synthetic.main.simple_month_view.view.*
 import org.threeten.bp.LocalDate
 import org.threeten.bp.format.DateTimeFormatter
@@ -15,10 +14,10 @@ import java.util.*
 
 internal class SimpleMonthViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-    fun bindViews(data: SimpleMonthData) {
+    fun bindViews(data: SimpleMonthData, clickListener: (() -> Unit)?) {
         setYear(data.days[SimpleConstant.MAGIC_INDEX])
         setMonthName(data.days[SimpleConstant.MAGIC_INDEX])
-        setMonth(data)
+        setMonth(data, clickListener)
     }
 
     private fun setYear(date: LocalDate) {
@@ -37,13 +36,12 @@ internal class SimpleMonthViewHolder(itemView: View) : RecyclerView.ViewHolder(i
         }
     }
 
-    private fun setMonth(data: SimpleMonthData) {
+    private fun setMonth(data: SimpleMonthData, clickListener: (() -> Unit)?) {
         val simpleDayData = data.days.map { SimpleDayData(month = data.month, day = it) }
         itemView.recycler_month.apply {
             layoutManager = GridLayoutManager(context, SimpleConstant.NUMBER_OF_DAYS_IN_ONE_WEEK)
             adapter = SimpleDayAdapter(simpleDayData).apply {
-                clickListener =
-                    { Toast.makeText(context, "item clicked", Toast.LENGTH_SHORT).show() }
+                this@apply.clickListener = clickListener
             }
         }
     }

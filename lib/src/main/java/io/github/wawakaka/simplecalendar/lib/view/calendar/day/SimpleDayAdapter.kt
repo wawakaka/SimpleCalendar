@@ -1,4 +1,4 @@
-package io.github.wawakaka.simplecalendar.lib.view.calendar.month.day
+package io.github.wawakaka.simplecalendar.lib.view.calendar.day
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
