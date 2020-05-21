@@ -1,11 +1,12 @@
-package io.github.wawakaka.simplecalendar.lib.view
+package io.github.wawakaka.simplecalendar.lib.utils
 
+import android.util.Log
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 
-abstract class EndlessRecyclerViewScrollListener : RecyclerView.OnScrollListener {
+internal abstract class EndlessRecyclerViewScrollListener : RecyclerView.OnScrollListener {
     // The minimum amount of items to have below your current scroll position
     // before loading more.
     private var visibleThreshold = 12
@@ -50,6 +51,8 @@ abstract class EndlessRecyclerViewScrollListener : RecyclerView.OnScrollListener
     // We are given a few useful parameters to help us work out if we need to load some more data,
     // but first we check if we are waiting for the previous load to finish.
     override fun onScrolled(view: RecyclerView, dx: Int, dy: Int) {
+        Log.e("dy", "$dy")
+        Log.e("dx", "$dx")
         var lastVisibleItemPosition = 0
         val totalItemCount = mLayoutManager.itemCount
 
@@ -78,18 +81,24 @@ abstract class EndlessRecyclerViewScrollListener : RecyclerView.OnScrollListener
         // If it’s still loading, we check to see if the dataset count has
         // changed, if so we conclude it has finished loading and update the current page
         // number and total item count.
-        if (loading && totalItemCount > previousTotalItemCount) {
+        if (loading) {
             loading = false
             previousTotalItemCount = totalItemCount
         }
 
+        if (!loading && lastVisibleItemPosition == 1) {
+            currentPage++
+            onLoadPrevious(currentPage, totalItemCount, view)
+            loading = true
+        }
+
         // If it isn’t currently loading, we check to see if we have breached
         // the visibleThreshold and need to reload more data.
-        // If we do need to reload some more data, we execute onLoadMore to fetch the data.
+        // If we do need to reload some more data, we execute onLoadNext to fetch the data.
         // threshold should reflect how many total columns there are too
         if (!loading && lastVisibleItemPosition + visibleThreshold > totalItemCount) {
             currentPage++
-            onLoadMore(currentPage, totalItemCount, view)
+            onLoadNext(currentPage, totalItemCount, view)
             loading = true
         }
     }
@@ -102,6 +111,8 @@ abstract class EndlessRecyclerViewScrollListener : RecyclerView.OnScrollListener
     }
 
     // Defines the process for actually loading more data based on page
-    abstract fun onLoadMore(page: Int, totalItemsCount: Int, view: RecyclerView)
+    abstract fun onLoadNext(page: Int, totalItemsCount: Int, view: RecyclerView)
+
+    abstract fun onLoadPrevious(page: Int, totalItemsCount: Int, view: RecyclerView)
 
 }
