@@ -2,46 +2,57 @@ package io.github.wawakaka.simplecalendar.lib.view.calendar
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
-import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.threetenabp.AndroidThreeTen
 import io.github.wawakaka.simplecalendar.lib.R
 import io.github.wawakaka.simplecalendar.lib.utils.EndlessRecyclerViewScrollListener
+import io.github.wawakaka.simplecalendar.lib.utils.LocalDateUtil
 import io.github.wawakaka.simplecalendar.lib.view.calendar.month.SimpleMonthAdapter
-import kotlinx.android.synthetic.main.simple_calendar_view.view.*
+import org.threeten.bp.LocalDate
+import org.threeten.bp.ZoneId
 
 class SimpleCalendarView @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null
-) : FrameLayout(context, attrs) {
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : FrameLayout(context, attrs, defStyleAttr) {
 
-    var clickListener: (() -> Unit)? = null
     private lateinit var adapter: SimpleMonthAdapter
     private lateinit var linearLayoutManager: LinearLayoutManager
     private lateinit var scrollListener: EndlessRecyclerViewScrollListener
 
     init {
-        val view = LayoutInflater
-            .from(context)
-            .inflate(R.layout.simple_calendar_view, this, true)
         AndroidThreeTen.init(context)
-        getViewRef(view)
+        layoutParams = LayoutParams(
+            LayoutParams.MATCH_PARENT,
+            LayoutParams.WRAP_CONTENT
+        )
+        addView(recyclerView())
     }
 
-    private fun getViewRef(view: View) {
-        setLayoutManagerAndAdapter(view)
+    fun setClickListener(clickListener: (() -> Unit)? = null) {
+        adapter.clickListener = clickListener
     }
 
-    private fun setLayoutManagerAndAdapter(view: View) {
-        adapter = SimpleMonthAdapter().apply {
-            clickListener = this@SimpleCalendarView.clickListener
+    private fun recyclerView(): View {
+        return RecyclerView(context).apply {
+            id = R.id.calendar_view_recycler
+            val params = LayoutParams(
+                LayoutParams.MATCH_PARENT,
+                LayoutParams.WRAP_CONTENT
+            )
+            layoutParams = params
+            init(this)
         }
+    }
+
+    private fun init(recyclerView: RecyclerView) {
         linearLayoutManager = LinearLayoutManager(
-            view.context, LinearLayoutManager.HORIZONTAL, false
+            recyclerView.context, LinearLayoutManager.HORIZONTAL, false
         )
         scrollListener = object : EndlessRecyclerViewScrollListener(linearLayoutManager) {
             override fun onLoadNext(page: Int, totalItemsCount: Int, view: RecyclerView) {
@@ -52,42 +63,18 @@ class SimpleCalendarView @JvmOverloads constructor(
                 adapter.loadPreviousYear()
             }
         }
-
-        val snapHelper = PagerSnapHelper()
-        recycler_calendar.layoutManager = linearLayoutManager
-        recycler_calendar.adapter = adapter
-        recycler_calendar.addOnScrollListener(scrollListener)
-//        snapHelper.attachToRecyclerView(recycler_calendar)
-
-        previous_month.post {
-            previous_month.setOnClickListener {
-                val position = (recycler_calendar.layoutManager as LinearLayoutManager)
-                    .findLastCompletelyVisibleItemPosition()
-                try {
-                    recycler_calendar.smoothScrollToPosition(position - 1)
-                    Toast.makeText(
-                        context,
-                        "previous button clicked ${position - 1}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } catch (e: IllegalArgumentException) {
-                    Toast.makeText(
-                        context,
-                        "$e",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-            }
+        adapter = SimpleMonthAdapter()
+        recyclerView.apply {
+            layoutManager = linearLayoutManager
+            adapter = this@SimpleCalendarView.adapter
+            addOnScrollListener(scrollListener)
+            PagerSnapHelper().attachToRecyclerView(this)
         }
+        adapter.initData(LocalDate.now(ZoneId.systemDefault()))
+        scrollToInitialPosition()
+    }
 
-        next_month.post {
-            next_month.setOnClickListener {
-                val position = (recycler_calendar.layoutManager as LinearLayoutManager)
-                    .findLastCompletelyVisibleItemPosition()
-                recycler_calendar.smoothScrollToPosition(position + 1)
-                Toast.makeText(context, "next button clicked ${position + 1}", Toast.LENGTH_LONG)
-                    .show()
-            }
-        }
+    private fun scrollToInitialPosition() {
+        linearLayoutManager.scrollToPosition(LocalDateUtil.getCurrentMonth().value)
     }
 }

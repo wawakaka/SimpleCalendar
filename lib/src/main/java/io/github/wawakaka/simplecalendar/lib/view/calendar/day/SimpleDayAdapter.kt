@@ -1,15 +1,14 @@
 package io.github.wawakaka.simplecalendar.lib.view.calendar.day
 
-import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import io.github.wawakaka.simplecalendar.lib.R
-import io.github.wawakaka.simplecalendar.lib.data.SimpleDayData
+import io.github.wawakaka.simplecalendar.lib.data.SimpleDateData
 
-internal class SimpleDayAdapter(private val data: List<SimpleDayData>) :
+internal class SimpleDayAdapter(
+    private val data: List<SimpleDateData>,
+    private val clickListener: (() -> Unit)? = null
+) :
     RecyclerView.Adapter<SimpleDayViewHolder>() {
-
-    var clickListener: (() -> Unit)? = null
 
     init {
         setHasStableIds(true)
@@ -20,12 +19,7 @@ internal class SimpleDayAdapter(private val data: List<SimpleDayData>) :
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SimpleDayViewHolder {
-        return SimpleDayViewHolder(
-            LayoutInflater.from(parent.context).inflate(
-                R.layout.simple_day_view,
-                null
-            )
-        )
+        return SimpleDayViewHolder(SimpleDayView(parent.context))
     }
 
     override fun getItemCount(): Int {

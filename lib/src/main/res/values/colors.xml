@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="white">#FFFFFF</color>
-    <color name="default_day_color">#000000</color>
+    <color name="black">#000000</color>
+    <color name="default_day_color">@color/black</color>
     <color name="disabled_day_color">#D3D3D3</color>
 </resources>

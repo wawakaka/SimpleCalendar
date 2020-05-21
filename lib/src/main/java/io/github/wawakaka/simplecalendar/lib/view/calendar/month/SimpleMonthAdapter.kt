@@ -1,32 +1,28 @@
 package io.github.wawakaka.simplecalendar.lib.view.calendar.month
 
-import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import io.github.wawakaka.simplecalendar.lib.R
-import io.github.wawakaka.simplecalendar.lib.data.SimpleMonthData
+import io.github.wawakaka.simplecalendar.lib.data.SimpleCalendarData
 import io.github.wawakaka.simplecalendar.lib.utils.LocalDateUtil
-import io.github.wawakaka.simplecalendar.lib.utils.SimpleConstant
 import org.threeten.bp.LocalDate
-import org.threeten.bp.ZoneId
 
 internal class SimpleMonthAdapter : RecyclerView.Adapter<SimpleMonthViewHolder>() {
 
-    var data = mutableListOf<SimpleMonthData>()
+    var data = mutableListOf<SimpleCalendarData>()
     var clickListener: (() -> Unit)? = null
+    private var reference: LocalDate? = null
 
     init {
         setHasStableIds(true)
+    }
 
-        for (index in 1..12) {
-            data.add(
-                SimpleMonthData(
-                    year = LocalDate.now(ZoneId.systemDefault()).year,
-                    month = LocalDateUtil.getMonth(index),
-                    days = LocalDateUtil.daysInMonth(index).toMutableList()
-                )
-            )
+    fun initData(localDate: LocalDate) {
+        this.data.apply {
+            clear()
+            addAll(LocalDateUtil.getDataFrom(localDate))
+            reference = localDate
         }
+        notifyDataSetChanged()
     }
 
     override fun getItemId(position: Int): Long {
@@ -34,11 +30,7 @@ internal class SimpleMonthAdapter : RecyclerView.Adapter<SimpleMonthViewHolder>(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SimpleMonthViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(
-            R.layout.simple_month_view,
-            null
-        )
-        return SimpleMonthViewHolder(view)
+        return SimpleMonthViewHolder(SimpleMonthView(parent.context))
     }
 
     override fun getItemCount(): Int {
@@ -50,37 +42,17 @@ internal class SimpleMonthAdapter : RecyclerView.Adapter<SimpleMonthViewHolder>(
     }
 
     fun loadNextYear() {
-        val year = data.last().days[SimpleConstant.MAGIC_INDEX].plusYears(1).year
-        for (index in 1..12) {
-            data.add(
-                SimpleMonthData(
-                    year = year,
-                    month = LocalDateUtil.getMonth(index),
-                    days = LocalDateUtil.days(
-                        year,
-                        index
-                    ).toMutableList()
-                )
-            )
-            notifyItemInserted(data.size)
-        }
+        val next = LocalDate.of(data.last().year, data.last().month, data.last().day)
+            .plusYears(1)
+        data.addAll(LocalDateUtil.getDataFrom(next))
+        notifyItemInserted(data.size)
     }
 
     fun loadPreviousYear() {
-        val year = data[0].days[SimpleConstant.MAGIC_INDEX].minusYears(1).year
-        for (index in 12 downTo 1) {
-            data.add(
-                0,
-                SimpleMonthData(
-                    year = year,
-                    month = LocalDateUtil.getMonth(index),
-                    days = LocalDateUtil.days(
-                        year,
-                        index
-                    ).toMutableList()
-                )
-            )
-            notifyItemInserted(0)
-        }
+        val previous = LocalDate.of(data.first().year, data.first().month, data.first().day)
+            .minusYears(1)
+        val previousData = LocalDateUtil.getDataFrom(previous)
+        data.addAll(0,previousData)
+        notifyItemRangeInserted(0, 12)
     }
 }

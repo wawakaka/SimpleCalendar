@@ -4,7 +4,7 @@ import org.threeten.bp.LocalDate
 import org.threeten.bp.Month
 import java.util.*
 
-internal data class SimpleDayData(
+internal data class SimpleDateData(
     val id: Int = UUID.randomUUID().toString().hashCode(),
     val month: Month,
     val day: LocalDate

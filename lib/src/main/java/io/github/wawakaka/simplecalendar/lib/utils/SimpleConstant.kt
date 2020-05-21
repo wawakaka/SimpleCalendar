@@ -8,4 +8,5 @@ internal object SimpleConstant {
 //    always represent actual date in current month. not like first 7 or last 14 item
 //    that might be belong to other month
     const val MAGIC_INDEX = 21
+    const val DEFAULT_TEXT_SIZE = 22f
 }

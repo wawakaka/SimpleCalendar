@@ -1,48 +1,45 @@
 package io.github.wawakaka.simplecalendar.lib.view.calendar.month
 
 import android.view.View
+import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import io.github.wawakaka.simplecalendar.lib.data.SimpleDayData
-import io.github.wawakaka.simplecalendar.lib.data.SimpleMonthData
+import io.github.wawakaka.simplecalendar.lib.R
+import io.github.wawakaka.simplecalendar.lib.data.SimpleCalendarData
+import io.github.wawakaka.simplecalendar.lib.data.SimpleDateData
+import io.github.wawakaka.simplecalendar.lib.utils.LocalDateUtil
 import io.github.wawakaka.simplecalendar.lib.utils.SimpleConstant
 import io.github.wawakaka.simplecalendar.lib.view.calendar.day.SimpleDayAdapter
-import kotlinx.android.synthetic.main.simple_month_view.view.*
-import org.threeten.bp.LocalDate
-import org.threeten.bp.format.DateTimeFormatter
-import java.util.*
 
 internal class SimpleMonthViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-    fun bindViews(data: SimpleMonthData, clickListener: (() -> Unit)?) {
-        setYear(data.days[SimpleConstant.MAGIC_INDEX])
-        setMonthName(data.days[SimpleConstant.MAGIC_INDEX])
+    private val textYear = itemView.findViewById<TextView>(R.id.month_view_text_year)
+    private val textMonth = itemView.findViewById<TextView>(R.id.month_view_text_month_name)
+    private val recyclerDays = itemView.findViewById<RecyclerView>(R.id.month_view_recycler_days)
+
+    fun bindViews(data: SimpleCalendarData, clickListener: (() -> Unit)?) {
+        setYear(data)
+        setMonthName(data)
         setMonth(data, clickListener)
     }
 
-    private fun setYear(date: LocalDate) {
-        itemView.text_year.text = try {
-            date.format(DateTimeFormatter.ofPattern("YYYY", Locale("in", "ID")))
-        } catch (e: IndexOutOfBoundsException) {
-            "xx"
-        }
+    private fun setYear(data: SimpleCalendarData) {
+        textYear.text = LocalDateUtil.getYearText(data)
     }
 
-    private fun setMonthName(date: LocalDate) {
-        itemView.text_month_name.text = try {
-            date.format(DateTimeFormatter.ofPattern("MMMM", Locale("in", "ID")))
-        } catch (e: IndexOutOfBoundsException) {
-            "xx"
-        }
+    private fun setMonthName(data: SimpleCalendarData) {
+        textMonth.text = LocalDateUtil.getMonthText(data)
     }
 
-    private fun setMonth(data: SimpleMonthData, clickListener: (() -> Unit)?) {
-        val simpleDayData = data.days.map { SimpleDayData(month = data.month, day = it) }
-        itemView.recycler_month.apply {
+    private fun setMonth(data: SimpleCalendarData, clickListener: (() -> Unit)?) {
+        val dates = mutableListOf<SimpleDateData>()
+        LocalDateUtil.days(data.year, data.month).forEach {
+            dates.add(SimpleDateData(day = it, month = LocalDateUtil.getMonth(data.month)))
+        }
+
+        recyclerDays.apply {
             layoutManager = GridLayoutManager(context, SimpleConstant.NUMBER_OF_DAYS_IN_ONE_WEEK)
-            adapter = SimpleDayAdapter(simpleDayData).apply {
-                this@apply.clickListener = clickListener
-            }
+            adapter = SimpleDayAdapter(dates, clickListener)
         }
     }
 
