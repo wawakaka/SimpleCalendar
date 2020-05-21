@@ -9,6 +9,9 @@ import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.threetenabp.AndroidThreeTen
 import io.github.wawakaka.simplecalendar.lib.R
+import io.github.wawakaka.simplecalendar.lib.data.SimpleDateData
+import io.github.wawakaka.simplecalendar.lib.data.SimpleMode
+import io.github.wawakaka.simplecalendar.lib.data.SimpleModes
 import io.github.wawakaka.simplecalendar.lib.utils.EndlessRecyclerViewScrollListener
 import io.github.wawakaka.simplecalendar.lib.utils.LocalDateUtil
 import io.github.wawakaka.simplecalendar.lib.view.calendar.month.SimpleMonthAdapter
@@ -24,6 +27,7 @@ class SimpleCalendarView @JvmOverloads constructor(
     private lateinit var adapter: SimpleMonthAdapter
     private lateinit var linearLayoutManager: LinearLayoutManager
     private lateinit var scrollListener: EndlessRecyclerViewScrollListener
+    private var mode: Int = SimpleModes.NORMAL
 
     init {
         AndroidThreeTen.init(context)
@@ -34,8 +38,12 @@ class SimpleCalendarView @JvmOverloads constructor(
         addView(recyclerView())
     }
 
-    fun setClickListener(clickListener: (() -> Unit)? = null) {
+    fun setClickListener(clickListener: ((SimpleDateData) -> Unit)? = null) {
         adapter.clickListener = clickListener
+    }
+
+    fun setMode(@SimpleMode mode: Int) {
+        this.mode = mode
     }
 
     private fun recyclerView(): View {
@@ -63,7 +71,7 @@ class SimpleCalendarView @JvmOverloads constructor(
                 adapter.loadPreviousYear()
             }
         }
-        adapter = SimpleMonthAdapter()
+        adapter = SimpleMonthAdapter(mode)
         recyclerView.apply {
             layoutManager = linearLayoutManager
             adapter = this@SimpleCalendarView.adapter

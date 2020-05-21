@@ -6,7 +6,7 @@ import io.github.wawakaka.simplecalendar.lib.data.SimpleDateData
 
 internal class SimpleDayAdapter(
     private val data: List<SimpleDateData>,
-    private val clickListener: (() -> Unit)? = null
+    private val clickListener: ((SimpleDateData) -> Unit)? = null
 ) :
     RecyclerView.Adapter<SimpleDayViewHolder>() {
 

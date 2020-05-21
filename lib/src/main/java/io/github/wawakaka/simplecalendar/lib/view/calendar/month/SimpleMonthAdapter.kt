@@ -3,13 +3,16 @@ package io.github.wawakaka.simplecalendar.lib.view.calendar.month
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import io.github.wawakaka.simplecalendar.lib.data.SimpleCalendarData
+import io.github.wawakaka.simplecalendar.lib.data.SimpleDateData
+import io.github.wawakaka.simplecalendar.lib.data.SimpleMode
 import io.github.wawakaka.simplecalendar.lib.utils.LocalDateUtil
 import org.threeten.bp.LocalDate
 
-internal class SimpleMonthAdapter : RecyclerView.Adapter<SimpleMonthViewHolder>() {
+internal class SimpleMonthAdapter(@SimpleMode private val mode: Int) :
+    RecyclerView.Adapter<SimpleMonthViewHolder>() {
 
     var data = mutableListOf<SimpleCalendarData>()
-    var clickListener: (() -> Unit)? = null
+    var clickListener: ((SimpleDateData) -> Unit)? = null
     private var reference: LocalDate? = null
 
     init {
@@ -38,7 +41,7 @@ internal class SimpleMonthAdapter : RecyclerView.Adapter<SimpleMonthViewHolder>(
     }
 
     override fun onBindViewHolder(holder: SimpleMonthViewHolder, position: Int) {
-        holder.bindViews(data = data[position], clickListener = clickListener)
+        holder.bindViews(data = data[position], clickListener = clickListener, mode = mode)
     }
 
     fun loadNextYear() {
@@ -52,7 +55,7 @@ internal class SimpleMonthAdapter : RecyclerView.Adapter<SimpleMonthViewHolder>(
         val previous = LocalDate.of(data.first().year, data.first().month, data.first().day)
             .minusYears(1)
         val previousData = LocalDateUtil.getDataFrom(previous)
-        data.addAll(0,previousData)
+        data.addAll(0, previousData)
         notifyItemRangeInserted(0, 12)
     }
 }
