@@ -2,15 +2,16 @@ package io.github.wawakaka.simplecalendar.lib.view.calendar
 
 import android.content.Context
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import io.github.wawakaka.simplecalendar.lib.R
-import io.github.wawakaka.simplecalendar.lib.data.SimpleDateData
 import io.github.wawakaka.simplecalendar.lib.data.SimpleMode
 import io.github.wawakaka.simplecalendar.lib.data.SimpleModes
+import io.github.wawakaka.simplecalendar.lib.data.SimpleMonthData
+import io.github.wawakaka.simplecalendar.lib.data.SimpleViewStates
 import io.github.wawakaka.simplecalendar.lib.utils.EndlessRecyclerViewScrollListener
 import io.github.wawakaka.simplecalendar.lib.utils.LocalDateUtil
 import io.github.wawakaka.simplecalendar.lib.view.calendar.month.SimpleMonthAdapter
@@ -27,7 +28,7 @@ class SimpleCalendarView @JvmOverloads constructor(
     private lateinit var adapter: SimpleMonthAdapter
     private lateinit var linearLayoutManager: LinearLayoutManager
     private lateinit var scrollListener: EndlessRecyclerViewScrollListener
-    private var mode: Int = SimpleModes.NORMAL
+    private var mode: Int = SimpleModes.SINGLE
 
     init {
         JodaTimeAndroid.init(context)
@@ -38,8 +39,39 @@ class SimpleCalendarView @JvmOverloads constructor(
         addView(recyclerView())
     }
 
-    fun setClickListener(clickListener: ((SimpleDateData) -> Unit)? = null) {
-        adapter.clickListener = clickListener
+    fun setClickListener(clickListener: (() -> Unit)? = null) {
+        adapter.clickListener = { datePosition, monthPosition ->
+            if (mode == SimpleModes.SINGLE) {
+//                adapter.data[monthPosition].apply {
+//                    val dateData = this.dateData[datePosition]
+//                    if (dateData.mode == SimpleModes.SINGLE) {
+//                        if (dateData.stateOnSingleMode == SimpleViewStates.NORMAL) {
+//                            dateData.stateOnSingleMode = SimpleViewStates.SELECTED
+//                        } else {
+//                            dateData.stateOnSingleMode = SimpleViewStates.NORMAL
+//                        }
+//                    } else {
+//                        throw Exception("Not yet implemented")
+//                    }
+//                }
+//                adapter.notifyItemChanged(monthPosition, true)
+                val temp = mutableListOf<SimpleMonthData>()
+                temp.addAll(adapter.data)
+                temp[monthPosition].dateData[datePosition].stateOnSingleMode =
+                    if (temp[monthPosition].dateData[datePosition].stateOnSingleMode == SimpleViewStates.NORMAL) {
+                        SimpleViewStates.SELECTED
+                    } else {
+                        SimpleViewStates.NORMAL
+                    }
+                Log.e("setClickListener", "temp: $temp")
+                adapter.data.clear()
+                adapter.data.addAll(temp)
+                adapter.notifyDataSetChanged()
+                clickListener?.invoke()
+            } else {
+                throw Exception("Not yet implemented")
+            }
+        }
     }
 
     fun setMode(@SimpleMode mode: Int) {
@@ -62,24 +94,24 @@ class SimpleCalendarView @JvmOverloads constructor(
         linearLayoutManager = LinearLayoutManager(
             recyclerView.context, LinearLayoutManager.HORIZONTAL, false
         )
-        scrollListener = object : EndlessRecyclerViewScrollListener(linearLayoutManager) {
-            override fun onLoadNext(page: Int, totalItemsCount: Int, view: RecyclerView) {
-                adapter.loadNextYear()
-            }
-
-            override fun onLoadPrevious(page: Int, totalItemsCount: Int, view: RecyclerView) {
-                adapter.loadPreviousYear()
-            }
-        }
+//        scrollListener = object : EndlessRecyclerViewScrollListener(linearLayoutManager) {
+//            override fun onLoadNext(page: Int, totalItemsCount: Int, view: RecyclerView) {
+//                adapter.loadNextYear()
+//            }
+//
+//            override fun onLoadPrevious(page: Int, totalItemsCount: Int, view: RecyclerView) {
+//                adapter.loadPreviousYear()
+//            }
+//        }
         adapter = SimpleMonthAdapter(mode)
         recyclerView.apply {
             layoutManager = linearLayoutManager
             adapter = this@SimpleCalendarView.adapter
-            addOnScrollListener(scrollListener)
-            PagerSnapHelper().attachToRecyclerView(this)
+//            addOnScrollListener(scrollListener)
+//            PagerSnapHelper().attachToRecyclerView(this)
         }
         adapter.initData(LocalDate.now(DateTimeZone.getDefault()))
-        scrollToInitialPosition()
+//        scrollToInitialPosition()
     }
 
     private fun scrollToInitialPosition() {

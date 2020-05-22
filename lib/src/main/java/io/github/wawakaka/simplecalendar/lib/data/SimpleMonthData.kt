@@ -1,11 +1,10 @@
 package io.github.wawakaka.simplecalendar.lib.data
 
-import org.joda.time.LocalDate
 import java.util.*
 
-data class SimpleDateData(
+data class SimpleMonthData(
     val id: Int = UUID.randomUUID().toString().hashCode(),
+    val year: Int,
     val month: Int,
-    val day: LocalDate,
-    val mode: SimpleState
+    val dateData: MutableList<SimpleDateData>
 )

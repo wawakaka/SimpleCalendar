@@ -1,7 +1,7 @@
 package io.github.wawakaka.simplecalendar.lib.utils
 
 import android.util.Log
-import io.github.wawakaka.simplecalendar.lib.data.SimpleCalendarData
+import io.github.wawakaka.simplecalendar.lib.data.*
 import io.github.wawakaka.simplecalendar.lib.utils.SimpleConstant.MAX_NUMBER_OF_DATE
 import org.joda.time.DateTimeConstants
 import org.joda.time.DateTimeZone
@@ -212,21 +212,20 @@ internal object LocalDateUtil {
         return localDate.dayOfWeek()
     }
 
-    fun getYearText(data: SimpleCalendarData): String {
+    fun getYearText(data: SimpleMonthData): String {
         return LocalDate.now(DateTimeZone.getDefault())
             .withYear(data.year)
             .toString("YYYY", Locale("in", "ID"))
     }
 
-    fun getMonthText(data: SimpleCalendarData): String {
+    fun getMonthText(data: SimpleMonthData): String {
         return LocalDate.now(DateTimeZone.getDefault())
             .withMonthOfYear(data.month)
             .toString("MMMM", Locale("in", "ID"))
     }
 
-    fun getDayText(data: SimpleCalendarData): String {
+    fun getDayText(data: SimpleMonthData): String {
         return LocalDate.now(DateTimeZone.getDefault())
-            .withDayOfMonth(data.day)
             .toString("d", Locale("in", "ID"))
     }
 
@@ -234,18 +233,38 @@ internal object LocalDateUtil {
         return date.toString("d", Locale("in", "ID"))
     }
 
-    fun getDataFrom(localDate: LocalDate): MutableList<SimpleCalendarData> {
-        val data = mutableListOf<SimpleCalendarData>()
+    fun getDataFrom(localDate: LocalDate, @SimpleMode mode: Int): MutableList<SimpleMonthData> {
+        val data = mutableListOf<SimpleMonthData>()
         for (month in 1..12) {
+            val year = localDate.year
+            val monthOfYear = localDate.withMonthOfYear(month).monthOfYear
             data.add(
-                SimpleCalendarData(
-                    year = localDate.year,
-                    month = localDate.withMonthOfYear(month).monthOfYear,
-                    day = getMonthMaxLength(localDate.withMonthOfYear(month))
+                SimpleMonthData(
+                    year = year,
+                    month = monthOfYear,
+                    dateData = calculateDateThisMonth(year, monthOfYear, mode)
                 )
             )
         }
         return data
+    }
+
+    private fun calculateDateThisMonth(
+        year: Int,
+        month: Int,
+        @SimpleMode mode: Int
+    ): MutableList<SimpleDateData> {
+        val dates = mutableListOf<SimpleDateData>()
+        days(year, month).forEach {
+            dates.add(
+                SimpleDateData(
+                    day = it,
+                    month = getMonth(month),
+                    mode = mode
+                )
+            )
+        }
+        return dates
     }
 
     private fun getMonthMaxLength(localDate: LocalDate): Int {

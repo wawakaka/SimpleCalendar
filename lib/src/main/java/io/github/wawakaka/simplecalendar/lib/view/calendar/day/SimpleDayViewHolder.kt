@@ -8,20 +8,29 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import io.github.wawakaka.simplecalendar.lib.R
-import io.github.wawakaka.simplecalendar.lib.data.*
+import io.github.wawakaka.simplecalendar.lib.data.SimpleDateData
+import io.github.wawakaka.simplecalendar.lib.data.SimpleModes
+import io.github.wawakaka.simplecalendar.lib.data.SimpleViewStates
 import io.github.wawakaka.simplecalendar.lib.utils.LocalDateUtil
 import io.github.wawakaka.simplecalendar.lib.utils.ViewUtil
 
-internal class SimpleDayViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+internal class SimpleDayViewHolder(
+    itemView: View,
+    private val clickListener: ((Int) -> Unit)?
+) : RecyclerView.ViewHolder(itemView) {
 
     private val textDay = itemView.findViewById<TextView>(R.id.day_view_text_day)
     private val container = itemView.findViewById<FrameLayout>(R.id.day_view_container)
 
-    fun bindViews(data: SimpleDateData, clickListener: ((SimpleDateData) -> Unit)?) {
+    fun bindViews(data: SimpleDateData) {
         setContainerSize()
         setDay(data)
         setState(data)
         setClickListener(data, clickListener)
+    }
+
+    fun bindPayload(data: SimpleDateData) {
+        setState(data)
     }
 
     private fun setContainerSize() {
@@ -46,59 +55,20 @@ internal class SimpleDayViewHolder(itemView: View) : RecyclerView.ViewHolder(ite
 
     private fun setClickListener(
         data: SimpleDateData,
-        clickListener: ((SimpleDateData) -> Unit)?
+        clickListener: ((Int) -> Unit)?
     ) {
         container.setOnClickListener {
-            Log.e("setClickListener", "clicked")
-            updateState(data)
-            setState(data)
-            clickListener?.invoke(data)
-        }
-    }
-
-    private fun updateState(
-        data: SimpleDateData
-    ) {
-        when (data.mode) {
-            is SimpleViewItem -> {
-                when (data.mode.state) {
-                    SimpleViewStates.NORMAL -> {
-                        data.mode.state = SimpleViewStates.SELECTED
-                    }
-                    SimpleViewStates.SELECTED -> {
-                        data.mode.state = SimpleViewStates.NORMAL
-                    }
-                    else -> {
-                        throw IllegalStateException("unhandled state")
-                    }
-                }
-            }
-            is SimpleRangedViewItem -> {
-                when (data.mode.state) {
-                    SimpleRangedViewStates.SELECTED_START -> {
-                        data.mode.state = SimpleRangedViewStates.NORMAL
-                    }
-                    SimpleRangedViewStates.SELECTED_MID -> {
-                        data.mode.state = SimpleRangedViewStates.SELECTED_START
-                    }
-                    SimpleRangedViewStates.SELECTED_END -> {
-                        data.mode.state = SimpleRangedViewStates.SELECTED_START
-                    }
-                    SimpleRangedViewStates.NORMAL -> {
-                        data.mode.state = SimpleRangedViewStates.SELECTED_START
-                    }
-                    else -> {
-                        throw IllegalStateException("unhandled state")
-                    }
-                }
-            }
+            clickListener?.invoke(
+                adapterPosition
+            )
         }
     }
 
     private fun setState(data: SimpleDateData) {
+        Log.e("SimpleDayViewHolder","setState: $data")
         when (data.mode) {
-            is SimpleViewItem -> {
-                when (data.mode.state) {
+            SimpleModes.SINGLE -> {
+                when (data.stateOnSingleMode) {
                     SimpleViewStates.NORMAL -> {
                         container.setBackgroundColor(Color.WHITE)
                     }
@@ -110,24 +80,25 @@ internal class SimpleDayViewHolder(itemView: View) : RecyclerView.ViewHolder(ite
                     }
                 }
             }
-            is SimpleRangedViewItem -> {
-                when (data.mode.state) {
-                    SimpleRangedViewStates.SELECTED_START -> {
-                        container.setBackgroundColor(Color.GREEN)
-                    }
-                    SimpleRangedViewStates.SELECTED_MID -> {
-                        container.setBackgroundColor(Color.GREEN)
-                    }
-                    SimpleRangedViewStates.SELECTED_END -> {
-                        container.setBackgroundColor(Color.GREEN)
-                    }
-                    SimpleRangedViewStates.NORMAL -> {
-                        container.setBackgroundColor(Color.WHITE)
-                    }
-                    else -> {
-                        throw IllegalStateException("unhandled state")
-                    }
-                }
+            SimpleModes.RANGED -> {
+                //todo implementation
+//                when ((data.mode as SimpleViewModeRanged).state) {
+//                    SimpleRangedViewStates.SELECTED_START -> {
+//                        container.setBackgroundColor(Color.GREEN)
+//                    }
+//                    SimpleRangedViewStates.SELECTED_MID -> {
+//                        container.setBackgroundColor(Color.GREEN)
+//                    }
+//                    SimpleRangedViewStates.SELECTED_END -> {
+//                        container.setBackgroundColor(Color.GREEN)
+//                    }
+//                    SimpleRangedViewStates.NORMAL -> {
+//                        container.setBackgroundColor(Color.WHITE)
+//                    }
+//                    else -> {
+//                        throw IllegalStateException("unhandled state")
+//                    }
+//                }
             }
         }
     }

@@ -13,7 +13,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(SimpleCalendarView(this).apply {
             setClickListener {
                 Toast.makeText(context, "item clicked", Toast.LENGTH_SHORT).show()
-                Log.e("setClickListener", it.toString())
             }
         })
     }

@@ -1,10 +1,11 @@
 package io.github.wawakaka.simplecalendar.lib.view.calendar.month
 
+import android.util.Log
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import io.github.wawakaka.simplecalendar.lib.data.SimpleCalendarData
-import io.github.wawakaka.simplecalendar.lib.data.SimpleDateData
+import androidx.recyclerview.widget.RecyclerView.NO_POSITION
 import io.github.wawakaka.simplecalendar.lib.data.SimpleMode
+import io.github.wawakaka.simplecalendar.lib.data.SimpleMonthData
 import io.github.wawakaka.simplecalendar.lib.utils.LocalDateUtil
 import org.joda.time.DateTimeZone
 import org.joda.time.LocalDate
@@ -12,8 +13,8 @@ import org.joda.time.LocalDate
 internal class SimpleMonthAdapter(@SimpleMode private val mode: Int) :
     RecyclerView.Adapter<SimpleMonthViewHolder>() {
 
-    var data = mutableListOf<SimpleCalendarData>()
-    var clickListener: ((SimpleDateData) -> Unit)? = null
+    var data = mutableListOf<SimpleMonthData>()
+    var clickListener: ((Int, Int) -> Unit)? = null
 
     init {
         setHasStableIds(true)
@@ -22,9 +23,28 @@ internal class SimpleMonthAdapter(@SimpleMode private val mode: Int) :
     fun initData(localDate: LocalDate) {
         this.data.apply {
             clear()
-            addAll(LocalDateUtil.getDataFrom(localDate))
+            addAll(LocalDateUtil.getDataFrom(localDate, mode))
         }
         notifyDataSetChanged()
+    }
+
+    fun loadNextYear() {
+        val next = LocalDate.now(DateTimeZone.getDefault())
+            .withMonthOfYear(data.last().month)
+            .withYear(data.last().year)
+            .plusYears(1)
+//        data.addAll(LocalDateUtil.getDataFrom(next, mode))
+//        notifyItemInserted(data.size)
+    }
+
+    fun loadPreviousYear() {
+        val previous = LocalDate.now(DateTimeZone.getDefault())
+            .withMonthOfYear(data.first().month)
+            .withYear(data.first().year)
+            .minusYears(1)
+        val previousData = LocalDateUtil.getDataFrom(previous, mode)
+//        data.addAll(0, previousData)
+//        notifyItemRangeInserted(0, 12)
     }
 
     override fun getItemId(position: Int): Long {
@@ -32,7 +52,11 @@ internal class SimpleMonthAdapter(@SimpleMode private val mode: Int) :
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SimpleMonthViewHolder {
-        return SimpleMonthViewHolder(SimpleMonthView(parent.context))
+        return SimpleMonthViewHolder(
+            itemView = SimpleMonthView(parent.context),
+            clickListener = clickListener,
+            mode = mode
+        )
     }
 
     override fun getItemCount(): Int {
@@ -40,27 +64,20 @@ internal class SimpleMonthAdapter(@SimpleMode private val mode: Int) :
     }
 
     override fun onBindViewHolder(holder: SimpleMonthViewHolder, position: Int) {
-        holder.bindViews(data = data[position], clickListener = clickListener, mode = mode)
+        if (position != NO_POSITION) {
+            holder.bindViews(data = data[position])
+        }
     }
 
-    fun loadNextYear() {
-        val next = LocalDate.now(DateTimeZone.getDefault())
-            .withDayOfMonth(data.last().day)
-            .withMonthOfYear(data.last().month)
-            .withYear(data.last().year)
-            .plusYears(1)
-        data.addAll(LocalDateUtil.getDataFrom(next))
-        notifyItemInserted(data.size)
-    }
-
-    fun loadPreviousYear() {
-        val previous = LocalDate.now(DateTimeZone.getDefault())
-            .withDayOfMonth(data.first().day)
-            .withMonthOfYear(data.first().month)
-            .withYear(data.first().year)
-            .minusYears(1)
-        val previousData = LocalDateUtil.getDataFrom(previous)
-        data.addAll(0, previousData)
-        notifyItemRangeInserted(0, 12)
+    override fun onBindViewHolder(
+        holder: SimpleMonthViewHolder,
+        position: Int,
+        payloads: MutableList<Any>
+    ) {
+        if (position != NO_POSITION && payloads.isNullOrEmpty().not()) {
+            Log.e("SimpleMonthAdapter", "Payloads: $payloads")
+            holder.bindPayload(data[position])
+        }
+        super.onBindViewHolder(holder, position, payloads)
     }
 }
