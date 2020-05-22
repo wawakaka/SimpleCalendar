@@ -38,7 +38,7 @@ internal class SimpleDayView @JvmOverloads constructor(
         return TextView(context).apply {
             id = R.id.day_view_text_day
             val params = LayoutParams(
-                LayoutParams.MATCH_PARENT,
+                LayoutParams.WRAP_CONTENT,
                 LayoutParams.WRAP_CONTENT
             )
             textSize = DEFAULT_TEXT_SIZE

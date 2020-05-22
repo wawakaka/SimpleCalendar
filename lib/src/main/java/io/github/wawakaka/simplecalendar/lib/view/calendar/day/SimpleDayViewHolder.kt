@@ -34,10 +34,9 @@ internal class SimpleDayViewHolder(itemView: View) : RecyclerView.ViewHolder(ite
     }
 
     private fun setDay(data: SimpleDateData) {
-        // todo try to remember why i put try catch here
         textDay.text = LocalDateUtil.getDayText(data.day)
         textDay.setTextColor(
-            if (data.day.month != data.month) {
+            if (data.day.monthOfYear != data.month) {
                 ContextCompat.getColor(itemView.context, R.color.disabled_day_color)
             } else {
                 ContextCompat.getColor(itemView.context, R.color.default_day_color)

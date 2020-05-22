@@ -7,7 +7,6 @@ import android.widget.FrameLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.jakewharton.threetenabp.AndroidThreeTen
 import io.github.wawakaka.simplecalendar.lib.R
 import io.github.wawakaka.simplecalendar.lib.data.SimpleDateData
 import io.github.wawakaka.simplecalendar.lib.data.SimpleMode
@@ -15,8 +14,9 @@ import io.github.wawakaka.simplecalendar.lib.data.SimpleModes
 import io.github.wawakaka.simplecalendar.lib.utils.EndlessRecyclerViewScrollListener
 import io.github.wawakaka.simplecalendar.lib.utils.LocalDateUtil
 import io.github.wawakaka.simplecalendar.lib.view.calendar.month.SimpleMonthAdapter
-import org.threeten.bp.LocalDate
-import org.threeten.bp.ZoneId
+import net.danlew.android.joda.JodaTimeAndroid
+import org.joda.time.DateTimeZone
+import org.joda.time.LocalDate
 
 class SimpleCalendarView @JvmOverloads constructor(
     context: Context,
@@ -30,7 +30,7 @@ class SimpleCalendarView @JvmOverloads constructor(
     private var mode: Int = SimpleModes.NORMAL
 
     init {
-        AndroidThreeTen.init(context)
+        JodaTimeAndroid.init(context)
         layoutParams = LayoutParams(
             LayoutParams.MATCH_PARENT,
             LayoutParams.WRAP_CONTENT
@@ -78,11 +78,11 @@ class SimpleCalendarView @JvmOverloads constructor(
             addOnScrollListener(scrollListener)
             PagerSnapHelper().attachToRecyclerView(this)
         }
-        adapter.initData(LocalDate.now(ZoneId.systemDefault()))
+        adapter.initData(LocalDate.now(DateTimeZone.getDefault()))
         scrollToInitialPosition()
     }
 
     private fun scrollToInitialPosition() {
-        linearLayoutManager.scrollToPosition(LocalDateUtil.getCurrentMonth().value)
+        linearLayoutManager.scrollToPosition(LocalDateUtil.getCurrentMonthValue() - 1)
     }
 }

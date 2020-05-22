@@ -6,14 +6,14 @@ import io.github.wawakaka.simplecalendar.lib.data.SimpleCalendarData
 import io.github.wawakaka.simplecalendar.lib.data.SimpleDateData
 import io.github.wawakaka.simplecalendar.lib.data.SimpleMode
 import io.github.wawakaka.simplecalendar.lib.utils.LocalDateUtil
-import org.threeten.bp.LocalDate
+import org.joda.time.DateTimeZone
+import org.joda.time.LocalDate
 
 internal class SimpleMonthAdapter(@SimpleMode private val mode: Int) :
     RecyclerView.Adapter<SimpleMonthViewHolder>() {
 
     var data = mutableListOf<SimpleCalendarData>()
     var clickListener: ((SimpleDateData) -> Unit)? = null
-    private var reference: LocalDate? = null
 
     init {
         setHasStableIds(true)
@@ -23,7 +23,6 @@ internal class SimpleMonthAdapter(@SimpleMode private val mode: Int) :
         this.data.apply {
             clear()
             addAll(LocalDateUtil.getDataFrom(localDate))
-            reference = localDate
         }
         notifyDataSetChanged()
     }
@@ -45,14 +44,20 @@ internal class SimpleMonthAdapter(@SimpleMode private val mode: Int) :
     }
 
     fun loadNextYear() {
-        val next = LocalDate.of(data.last().year, data.last().month, data.last().day)
+        val next = LocalDate.now(DateTimeZone.getDefault())
+            .withDayOfMonth(data.last().day)
+            .withMonthOfYear(data.last().month)
+            .withYear(data.last().year)
             .plusYears(1)
         data.addAll(LocalDateUtil.getDataFrom(next))
         notifyItemInserted(data.size)
     }
 
     fun loadPreviousYear() {
-        val previous = LocalDate.of(data.first().year, data.first().month, data.first().day)
+        val previous = LocalDate.now(DateTimeZone.getDefault())
+            .withDayOfMonth(data.first().day)
+            .withMonthOfYear(data.first().month)
+            .withYear(data.first().year)
             .minusYears(1)
         val previousData = LocalDateUtil.getDataFrom(previous)
         data.addAll(0, previousData)

@@ -1,12 +1,11 @@
 package io.github.wawakaka.simplecalendar.lib.data
 
-import org.threeten.bp.LocalDate
-import org.threeten.bp.Month
+import org.joda.time.LocalDate
 import java.util.*
 
 data class SimpleDateData(
     val id: Int = UUID.randomUUID().toString().hashCode(),
-    val month: Month,
+    val month: Int,
     val day: LocalDate,
     val mode: SimpleState
 )

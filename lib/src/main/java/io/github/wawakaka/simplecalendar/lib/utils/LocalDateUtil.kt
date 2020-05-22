@@ -3,29 +3,25 @@ package io.github.wawakaka.simplecalendar.lib.utils
 import android.util.Log
 import io.github.wawakaka.simplecalendar.lib.data.SimpleCalendarData
 import io.github.wawakaka.simplecalendar.lib.utils.SimpleConstant.MAX_NUMBER_OF_DATE
-import org.threeten.bp.DayOfWeek
-import org.threeten.bp.LocalDate
-import org.threeten.bp.Month
-import org.threeten.bp.ZoneId
-import org.threeten.bp.format.DateTimeFormatter
-import org.threeten.bp.temporal.WeekFields
+import org.joda.time.DateTimeConstants
+import org.joda.time.DateTimeZone
+import org.joda.time.LocalDate
 import java.util.*
 
 internal object LocalDateUtil {
 
     fun days(year: Int, month: Int): List<LocalDate> {
         val result = mutableListOf<LocalDate>()
-        val day =
-            LocalDate.now(ZoneId.systemDefault())
-                .withDayOfMonth(1)
-                .withMonth(month)
-                .withYear(year)
+        val day = LocalDate.now(DateTimeZone.getDefault())
+            .withDayOfMonth(1)
+            .withMonthOfYear(month)
+            .withYear(year)
         val previousMonthDateList = getLastMonthDate(day)
 
         result.addAll(previousMonthDateList)
 
-        for (index in day.dayOfMonth - 1 until day.lengthOfMonth()) {
-            result.add(day.plusDays(index.toLong()))
+        for (index in day.dayOfMonth - 1 until day.dayOfMonth().maximumValue) {
+            result.add(day.plusDays(index))
         }
 
         val nextMonthDateList = getNextMonthDate(
@@ -40,15 +36,15 @@ internal object LocalDateUtil {
 
     fun daysInMonth(month: Int): List<LocalDate> {
         val result = mutableListOf<LocalDate>()
-        val day = LocalDate.now(ZoneId.systemDefault())
+        val day = LocalDate.now(DateTimeZone.getDefault())
             .withDayOfMonth(1)
-            .withMonth(month)
+            .withMonthOfYear(month)
         val previousMonthDateList = getLastMonthDate(day)
 
         result.addAll(previousMonthDateList)
 
-        for (index in day.dayOfMonth - 1 until day.lengthOfMonth()) {
-            result.add(day.plusDays(index.toLong()))
+        for (index in day.dayOfMonth - 1 until day.dayOfMonth().maximumValue) {
+            result.add(day.plusDays(index))
         }
 
         val nextMonthDateList = getNextMonthDate(
@@ -62,29 +58,31 @@ internal object LocalDateUtil {
     }
 
     private fun getLastMonthDate(firstDayOfTheMonth: LocalDate): MutableList<LocalDate> {
-        val firstDayOfTheWeekName = getStartDayOfTheWeek()
-            .name
-        val firstDayOfTheMonthName = firstDayOfTheMonth.dayOfWeek.name
-        return if (firstDayOfTheWeekName == DayOfWeek.SUNDAY.name) {
-            when (firstDayOfTheMonthName) {
-                DayOfWeek.SUNDAY.name -> mutableListOf()
-                DayOfWeek.MONDAY.name -> getLastMonthDateList(
+        Log.e("Locale", Locale.getDefault().language)
+        Log.e("Locale", Locale.getDefault().country)
+        val firstDayOfTheWeekValue =
+            LocalDate.now(DateTimeZone.getDefault()).dayOfWeek().minimumValue
+        val firstDayOfTheMonthValue = firstDayOfTheMonth.dayOfWeek().get()
+        return if (firstDayOfTheWeekValue == DateTimeConstants.SUNDAY) {
+            when (firstDayOfTheMonthValue) {
+                DateTimeConstants.SUNDAY -> mutableListOf()
+                DateTimeConstants.MONDAY -> getLastMonthDateList(
                     1,
                     firstDayOfTheMonth
                 )
-                DayOfWeek.TUESDAY.name -> getLastMonthDateList(
+                DateTimeConstants.TUESDAY -> getLastMonthDateList(
                     2,
                     firstDayOfTheMonth
                 )
-                DayOfWeek.WEDNESDAY.name -> getLastMonthDateList(
+                DateTimeConstants.WEDNESDAY -> getLastMonthDateList(
                     3,
                     firstDayOfTheMonth
                 )
-                DayOfWeek.THURSDAY.name -> getLastMonthDateList(
+                DateTimeConstants.THURSDAY -> getLastMonthDateList(
                     4,
                     firstDayOfTheMonth
                 )
-                DayOfWeek.FRIDAY.name -> getLastMonthDateList(
+                DateTimeConstants.FRIDAY -> getLastMonthDateList(
                     5,
                     firstDayOfTheMonth
                 )
@@ -94,25 +92,25 @@ internal object LocalDateUtil {
                 )
             }
         } else {
-            when (firstDayOfTheMonthName) {
-                DayOfWeek.MONDAY.name -> mutableListOf()
-                DayOfWeek.TUESDAY.name -> getLastMonthDateList(
+            when (firstDayOfTheMonthValue) {
+                DateTimeConstants.MONDAY -> mutableListOf()
+                DateTimeConstants.TUESDAY -> getLastMonthDateList(
                     1,
                     firstDayOfTheMonth
                 )
-                DayOfWeek.WEDNESDAY.name -> getLastMonthDateList(
+                DateTimeConstants.WEDNESDAY -> getLastMonthDateList(
                     2,
                     firstDayOfTheMonth
                 )
-                DayOfWeek.THURSDAY.name -> getLastMonthDateList(
+                DateTimeConstants.THURSDAY -> getLastMonthDateList(
                     3,
                     firstDayOfTheMonth
                 )
-                DayOfWeek.FRIDAY.name -> getLastMonthDateList(
+                DateTimeConstants.FRIDAY -> getLastMonthDateList(
                     4,
                     firstDayOfTheMonth
                 )
-                DayOfWeek.SATURDAY.name -> getLastMonthDateList(
+                DateTimeConstants.SATURDAY -> getLastMonthDateList(
                     5,
                     firstDayOfTheMonth
                 )
@@ -124,132 +122,116 @@ internal object LocalDateUtil {
         }
     }
 
-    private fun getStartDayOfTheWeek(): DayOfWeek {
-        Log.e("Locale", Locale.getDefault().language)
-        Log.e("Locale", Locale.getDefault().country)
-        return WeekFields.of(Locale("in", "ID")).firstDayOfWeek
-    }
-
     private fun getLastMonthDateList(numberOfDays: Int, date: LocalDate): MutableList<LocalDate> {
         val listOfDate = mutableListOf<LocalDate>()
-        for (index in numberOfDays downTo 1) {
+        for (index in numberOfDays - 1 downTo 0) {
             val day = date
                 .minusMonths(1)
-                .withDayOfMonth(date.minusMonths(1).lengthOfMonth())
-            if (index == numberOfDays) listOfDate.add(day)
-            else listOfDate.add(day.minusDays(index.toLong()))
+                .withDayOfMonth(date.minusMonths(1).dayOfMonth().maximumValue)
+            listOfDate.add(day.minusDays(index))
         }
         return listOfDate
     }
 
     private fun getNextMonthDate(date: LocalDate, currentListSize: Int): MutableList<LocalDate> {
         val numberOfDays = MAX_NUMBER_OF_DATE - currentListSize
-        return getNextMonthDateList(
-            date,
-            numberOfDays
-        )
+        return when (currentListSize) {
+            28, 35, 42 -> {
+                mutableListOf()
+            }
+            else -> {
+                getNextMonthDateList(
+                    date,
+                    numberOfDays
+                )
+            }
+        }
     }
 
     private fun getNextMonthDateList(date: LocalDate, numberOfDays: Int): MutableList<LocalDate> {
         val listOfDate = mutableListOf<LocalDate>()
         for (index in 0 until numberOfDays) {
-            listOfDate.add(date.plusMonths(1).withDayOfMonth(1).plusDays(index.toLong()))
+            listOfDate.add(date.plusMonths(1).withDayOfMonth(1).plusDays(index))
         }
         return listOfDate
     }
 
-    fun getMonth(month: Int): Month {
+    fun getMonth(month: Int): Int {
         return when (month) {
-            1 -> Month.JANUARY
-            2 -> Month.FEBRUARY
-            3 -> Month.MARCH
-            4 -> Month.APRIL
-            5 -> Month.MAY
-            6 -> Month.JUNE
-            7 -> Month.JULY
-            8 -> Month.AUGUST
-            9 -> Month.SEPTEMBER
-            10 -> Month.OCTOBER
-            11 -> Month.NOVEMBER
-            else -> Month.DECEMBER
+            1 -> DateTimeConstants.JANUARY
+            2 -> DateTimeConstants.FEBRUARY
+            3 -> DateTimeConstants.MARCH
+            4 -> DateTimeConstants.APRIL
+            5 -> DateTimeConstants.MAY
+            6 -> DateTimeConstants.JUNE
+            7 -> DateTimeConstants.JULY
+            8 -> DateTimeConstants.AUGUST
+            9 -> DateTimeConstants.SEPTEMBER
+            10 -> DateTimeConstants.OCTOBER
+            11 -> DateTimeConstants.NOVEMBER
+            else -> DateTimeConstants.DECEMBER
         }
     }
 
     fun getListOfDays(year: Int, month: Int): List<LocalDate> {
         val result = mutableListOf<LocalDate>()
-        val day = LocalDate.now(ZoneId.systemDefault())
+        val day = LocalDate.now(DateTimeZone.getDefault())
             .withDayOfMonth(1)
-            .withMonth(month)
+            .withMonthOfYear(month)
             .withYear(year)
 
-        for (index in day.dayOfMonth - 1 until day.lengthOfMonth()) {
-            result.add(day.plusDays(index.toLong()))
+        for (index in day.dayOfMonth - 1 until day.dayOfMonth().maximumValue) {
+            result.add(day.plusDays(index))
         }
 
         return result
     }
 
     fun getCurrentYear(): Int {
-        val localDate = LocalDate.now(ZoneId.systemDefault())
+        val localDate = LocalDate.now(DateTimeZone.getDefault())
         return localDate.year
     }
 
     fun getCurrentMonthValue(): Int {
-        val localDate = LocalDate.now(ZoneId.systemDefault())
-        return localDate.monthValue
+        val localDate = LocalDate.now(DateTimeZone.getDefault())
+        return localDate.monthOfYear
     }
 
-    fun getCurrentMonth(): Month {
-        val localDate = LocalDate.now(ZoneId.systemDefault())
-        return localDate.month
+    fun getCurrentMonth(): LocalDate.Property {
+        val localDate = LocalDate.now(DateTimeZone.getDefault())
+        return localDate.monthOfYear()
     }
 
     fun getCurrentDayOfMonth(): Int {
-        val localDate = LocalDate.now(ZoneId.systemDefault())
+        val localDate = LocalDate.now(DateTimeZone.getDefault())
         return localDate.dayOfMonth
     }
 
-    fun getCurrentDayOfWeek(): DayOfWeek {
-        val localDate = LocalDate.now(ZoneId.systemDefault())
-        return localDate.dayOfWeek
+    fun getCurrentDayOfWeek(): LocalDate.Property {
+        val localDate = LocalDate.now(DateTimeZone.getDefault())
+        return localDate.dayOfWeek()
     }
 
     fun getYearText(data: SimpleCalendarData): String {
-        return try {
-            LocalDate
-                .of(data.year, data.month, data.day)
-                .format(DateTimeFormatter.ofPattern("YYYY", Locale("in", "ID")))
-        } catch (e: IndexOutOfBoundsException) {
-            "xx"
-        }
+        return LocalDate.now(DateTimeZone.getDefault())
+            .withYear(data.year)
+            .toString("YYYY", Locale("in", "ID"))
     }
 
     fun getMonthText(data: SimpleCalendarData): String {
-        return try {
-            LocalDate
-                .of(data.year, data.month, data.day)
-                .format(DateTimeFormatter.ofPattern("MMMM", Locale("in", "ID")))
-        } catch (e: IndexOutOfBoundsException) {
-            "xx"
-        }
+        return LocalDate.now(DateTimeZone.getDefault())
+            .withMonthOfYear(data.month)
+            .toString("MMMM", Locale("in", "ID"))
     }
 
     fun getDayText(data: SimpleCalendarData): String {
-        return try {
-            LocalDate
-                .of(data.year, data.month, data.day)
-                .format(DateTimeFormatter.ofPattern("d"))
-        } catch (e: IndexOutOfBoundsException) {
-            "xx"
-        }
+        return LocalDate.now(DateTimeZone.getDefault())
+            .withDayOfMonth(data.day)
+            .toString("d", Locale("in", "ID"))
     }
 
     fun getDayText(date: LocalDate): String {
-        return try {
-            date.format(DateTimeFormatter.ofPattern("d"))
-        } catch (e: IndexOutOfBoundsException) {
-            "xx"
-        }
+        return date.toString("d", Locale("in", "ID"))
     }
 
     fun getDataFrom(localDate: LocalDate): MutableList<SimpleCalendarData> {
@@ -258,19 +240,17 @@ internal object LocalDateUtil {
             data.add(
                 SimpleCalendarData(
                     year = localDate.year,
-                    month = localDate.withMonth(month).monthValue,
-                    day = getMonthMaxLength(localDate.withMonth(month))
+                    month = localDate.withMonthOfYear(month).monthOfYear,
+                    day = getMonthMaxLength(localDate.withMonthOfYear(month))
                 )
             )
         }
         return data
     }
 
-    fun getMonthMaxLength(localDate: LocalDate): Int {
-        return if (localDate.month == Month.FEBRUARY && localDate.isLeapYear.not()) {
-            localDate.month.maxLength() - 1
-        } else {
-            localDate.month.maxLength()
-        }
+    private fun getMonthMaxLength(localDate: LocalDate): Int {
+        val result = localDate.withDayOfMonth(localDate.dayOfMonth().maximumValue).dayOfMonth
+        Log.e("getMonthMaxLength", "year: ${localDate.year}-${localDate.monthOfYear}-$result")
+        return result
     }
 }
