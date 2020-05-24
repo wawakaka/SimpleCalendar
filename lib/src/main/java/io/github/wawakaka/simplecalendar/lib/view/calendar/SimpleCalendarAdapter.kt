@@ -1,4 +1,4 @@
-package io.github.wawakaka.simplecalendar.lib.view.calendar.month
+package io.github.wawakaka.simplecalendar.lib.view.calendar
 
 import android.util.Log
 import android.view.ViewGroup
@@ -10,8 +10,8 @@ import io.github.wawakaka.simplecalendar.lib.utils.LocalDateUtil
 import org.joda.time.DateTimeZone
 import org.joda.time.LocalDate
 
-internal class SimpleMonthAdapter(@SimpleMode private val mode: Int) :
-    RecyclerView.Adapter<SimpleMonthViewHolder>() {
+internal class SimpleCalendarAdapter(@SimpleMode private val mode: Int) :
+    RecyclerView.Adapter<SimpleCalendarViewHolder>() {
 
     var data = mutableListOf<SimpleMonthData>()
     var clickListener: ((Int, Int) -> Unit)? = null
@@ -33,8 +33,8 @@ internal class SimpleMonthAdapter(@SimpleMode private val mode: Int) :
             .withMonthOfYear(data.last().month)
             .withYear(data.last().year)
             .plusYears(1)
-//        data.addAll(LocalDateUtil.getDataFrom(next, mode))
-//        notifyItemInserted(data.size)
+        data.addAll(LocalDateUtil.getDataFrom(next, mode))
+        notifyItemInserted(data.size)
     }
 
     fun loadPreviousYear() {
@@ -43,17 +43,19 @@ internal class SimpleMonthAdapter(@SimpleMode private val mode: Int) :
             .withYear(data.first().year)
             .minusYears(1)
         val previousData = LocalDateUtil.getDataFrom(previous, mode)
-//        data.addAll(0, previousData)
-//        notifyItemRangeInserted(0, 12)
+        data.addAll(0, previousData)
+        notifyItemRangeInserted(0, 12)
     }
 
     override fun getItemId(position: Int): Long {
         return data[position].id.hashCode().toLong()
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SimpleMonthViewHolder {
-        return SimpleMonthViewHolder(
-            itemView = SimpleMonthView(parent.context),
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SimpleCalendarViewHolder {
+        return SimpleCalendarViewHolder(
+            itemView = SimpleCalendarView(
+                parent.context
+            ),
             clickListener = clickListener,
             mode = mode
         )
@@ -63,14 +65,14 @@ internal class SimpleMonthAdapter(@SimpleMode private val mode: Int) :
         return data.size
     }
 
-    override fun onBindViewHolder(holder: SimpleMonthViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: SimpleCalendarViewHolder, position: Int) {
         if (position != NO_POSITION) {
             holder.bindViews(data = data[position])
         }
     }
 
     override fun onBindViewHolder(
-        holder: SimpleMonthViewHolder,
+        holder: SimpleCalendarViewHolder,
         position: Int,
         payloads: MutableList<Any>
     ) {
