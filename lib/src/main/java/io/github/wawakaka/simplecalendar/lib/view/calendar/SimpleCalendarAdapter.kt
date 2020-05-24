@@ -4,6 +4,7 @@ import android.util.Log
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.NO_POSITION
+import io.github.wawakaka.simplecalendar.lib.data.SimpleDateData
 import io.github.wawakaka.simplecalendar.lib.data.SimpleMode
 import io.github.wawakaka.simplecalendar.lib.data.SimpleMonthData
 import io.github.wawakaka.simplecalendar.lib.utils.LocalDateUtil
@@ -14,7 +15,7 @@ internal class SimpleCalendarAdapter(@SimpleMode private val mode: Int) :
     RecyclerView.Adapter<SimpleCalendarViewHolder>() {
 
     var data = mutableListOf<SimpleMonthData>()
-    var clickListener: ((Int, Int) -> Unit)? = null
+    var clickListener: ((SimpleDateData) -> Unit)? = null
 
     init {
         setHasStableIds(true)

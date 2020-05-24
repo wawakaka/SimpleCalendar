@@ -1,8 +1,9 @@
 package io.github.wawakaka.simplecalendar.lib.utils
 
 import android.util.Log
-import io.github.wawakaka.simplecalendar.lib.data.*
-import io.github.wawakaka.simplecalendar.lib.utils.SimpleConstant.MAX_NUMBER_OF_DATE
+import io.github.wawakaka.simplecalendar.lib.data.SimpleDateData
+import io.github.wawakaka.simplecalendar.lib.data.SimpleMode
+import io.github.wawakaka.simplecalendar.lib.data.SimpleMonthData
 import org.joda.time.DateTimeConstants
 import org.joda.time.DateTimeZone
 import org.joda.time.LocalDate
@@ -58,10 +59,8 @@ internal object LocalDateUtil {
     }
 
     private fun getLastMonthDate(firstDayOfTheMonth: LocalDate): MutableList<LocalDate> {
-        Log.e("Locale", Locale.getDefault().language)
-        Log.e("Locale", Locale.getDefault().country)
         val firstDayOfTheWeekValue =
-            LocalDate.now(DateTimeZone.getDefault()).dayOfWeek().minimumValue
+            LocalDate.now(DateTimeZone.forID("Asia/Jakarta")).dayOfWeek().minimumValue
         val firstDayOfTheMonthValue = firstDayOfTheMonth.dayOfWeek().get()
         return if (firstDayOfTheWeekValue == DateTimeConstants.SUNDAY) {
             when (firstDayOfTheMonthValue) {
@@ -134,15 +133,20 @@ internal object LocalDateUtil {
     }
 
     private fun getNextMonthDate(date: LocalDate, currentListSize: Int): MutableList<LocalDate> {
-        val numberOfDays = MAX_NUMBER_OF_DATE - currentListSize
         return when (currentListSize) {
             28, 35, 42 -> {
                 mutableListOf()
             }
             else -> {
                 getNextMonthDateList(
-                    date,
-                    numberOfDays
+                    date = date,
+                    numberOfDays = when {
+                        currentListSize in 0..27 -> 28 - currentListSize
+                        currentListSize in 29..34 -> 35 - currentListSize
+                        currentListSize in 36..41 -> 42 - currentListSize
+                        currentListSize > 42 -> throw Exception("something not right")
+                        else -> currentListSize
+                    }
                 )
             }
         }

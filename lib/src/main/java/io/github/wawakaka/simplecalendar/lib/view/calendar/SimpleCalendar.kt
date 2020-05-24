@@ -2,13 +2,16 @@ package io.github.wawakaka.simplecalendar.lib.view.calendar
 
 import android.content.Context
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import io.github.wawakaka.simplecalendar.lib.R
 import io.github.wawakaka.simplecalendar.lib.data.SimpleMode
 import io.github.wawakaka.simplecalendar.lib.data.SimpleModes
+import io.github.wawakaka.simplecalendar.lib.data.SimpleViewStates
 import io.github.wawakaka.simplecalendar.lib.utils.EndlessRecyclerViewScrollListener
 import io.github.wawakaka.simplecalendar.lib.utils.LocalDateUtil
 import net.danlew.android.joda.JodaTimeAndroid
@@ -30,7 +33,7 @@ class SimpleCalendar @JvmOverloads constructor(
         JodaTimeAndroid.init(context)
         layoutParams = LayoutParams(
             LayoutParams.MATCH_PARENT,
-            LayoutParams.WRAP_CONTENT
+            LayoutParams.MATCH_PARENT
         )
         addView(recyclerView())
     }
@@ -41,10 +44,10 @@ class SimpleCalendar @JvmOverloads constructor(
 
     private fun recyclerView(): View {
         return RecyclerView(context).apply {
-            id = R.id.calendar_view_recycler
+            id = R.id.calendar_recycler
             val params = LayoutParams(
                 LayoutParams.MATCH_PARENT,
-                LayoutParams.WRAP_CONTENT
+                LayoutParams.MATCH_PARENT
             )
             layoutParams = params
             init(this)
@@ -64,21 +67,25 @@ class SimpleCalendar @JvmOverloads constructor(
                 adapter.loadPreviousYear()
             }
         }
-        adapter =
-            SimpleCalendarAdapter(
-                mode
-            )
+        adapter = SimpleCalendarAdapter(mode)
         recyclerView.apply {
             layoutManager = linearLayoutManager
             adapter = this@SimpleCalendar.adapter
             addOnScrollListener(scrollListener)
-//            PagerSnapHelper().attachToRecyclerView(this)
+            PagerSnapHelper().attachToRecyclerView(this)
         }
-        adapter.initData(LocalDate.now(DateTimeZone.getDefault()))
-//        scrollToInitialPosition()
+        adapter.apply {
+            initData(LocalDate.now(DateTimeZone.getDefault()))
+            clickListener = { clickListenerData ->
+                notifyDataSetChanged()
+                Log.e("SimpleCalendar", "adapter.data : ${adapter.data}")
+            }
+        }
+
+        scrollToInitialPosition()
     }
 
     private fun scrollToInitialPosition() {
-        linearLayoutManager.scrollToPosition(LocalDateUtil.getCurrentMonthValue() - 1)
+//        linearLayoutManager.scrollToPosition(LocalDateUtil.getCurrentMonthValue() - 1)
     }
 }

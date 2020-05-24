@@ -7,7 +7,7 @@ import io.github.wawakaka.simplecalendar.lib.utils.SimpleConstant.NUMBER_OF_DAYS
 
 internal object ViewUtil {
 
-    fun getDayBoxSize(context: Context): Int {
+    fun getDayViewWidthSize(context: Context): Int {
         return context.displayWidth / NUMBER_OF_DAYS_IN_ONE_WEEK
     }
 

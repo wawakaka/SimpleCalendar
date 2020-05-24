@@ -4,7 +4,7 @@ import org.joda.time.LocalDate
 import java.util.*
 
 data class SimpleDateData(
-    val id: Int = UUID.randomUUID().toString().hashCode(),
+    val tag: Int = UUID.randomUUID().toString().hashCode(),
     val month: Int,
     val day: LocalDate,
     @SimpleMode var mode: Int = SimpleModes.SINGLE,

@@ -5,7 +5,6 @@ import android.os.Build
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.Gravity
-import android.view.View
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -21,31 +20,38 @@ internal class SimpleDayView @JvmOverloads constructor(
 
     init {
         layoutParams = LayoutParams(
-            LayoutParams.WRAP_CONTENT,
-            LayoutParams.WRAP_CONTENT
+            LayoutParams.MATCH_PARENT,
+            LayoutParams.MATCH_PARENT
         )
-        val outValue = TypedValue()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            getContext().theme.resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, outValue, true)
-//            foreground = ContextCompat.getDrawable(context, outValue.resourceId)
-            background = ContextCompat.getDrawable(context, outValue.resourceId)
-        }
         id = R.id.day_view_container
         addView(textDay())
     }
 
-    private fun textDay(): View {
+    private fun textDay(): TextView {
         return TextView(context).apply {
             id = R.id.day_view_text_day
             val params = LayoutParams(
-                LayoutParams.WRAP_CONTENT,
-                LayoutParams.WRAP_CONTENT
-            )
+                LayoutParams.MATCH_PARENT,
+                LayoutParams.MATCH_PARENT
+            ).apply {
+                gravity = Gravity.CENTER
+            }
             textSize = DEFAULT_TEXT_SIZE
             layoutParams = params
             gravity = Gravity.CENTER
             setTextColorCompat(R.color.black)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f)
+
+            val outValue = TypedValue()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                context.theme.resolveAttribute(
+                    android.R.attr.selectableItemBackgroundBorderless,
+                    outValue,
+                    true
+                )
+//            foreground = ContextCompat.getDrawable(context, outValue.resourceId)
+                setBackgroundResource(outValue.resourceId)
+            }
         }
     }
 }

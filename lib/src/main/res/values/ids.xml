@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--ids for SimpleCalendar-->
+    <item name="calendar_recycler" type="id" />
     <!--ids for SimpleCalendarView-->
-    <item name="calendar_view_recycler" type="id" />
-    <!--ids for SimpleMonthView-->
-    <item name="month_view_text_year" type="id" />
-    <item name="month_view_text_month_name" type="id" />
-    <item name="month_view" type="id" />
+    <item name="calendar_view_text_year" type="id" />
+    <item name="calendar_view_text_month_name" type="id" />
+    <item name="calendar_view" type="id" />
     <!--ids for SimpleDayView-->
     <item name="day_view_container" type="id" />
     <item name="day_view_text_day" type="id" />

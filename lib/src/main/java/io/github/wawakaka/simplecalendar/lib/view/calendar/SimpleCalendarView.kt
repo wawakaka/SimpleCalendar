@@ -4,12 +4,13 @@ import android.content.Context
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.Gravity
-import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import io.github.wawakaka.simplecalendar.lib.R
 import io.github.wawakaka.simplecalendar.lib.extension.dpToPx
 import io.github.wawakaka.simplecalendar.lib.extension.setTextColorCompat
+import io.github.wawakaka.simplecalendar.lib.utils.ViewUtil
+import io.github.wawakaka.simplecalendar.lib.view.calendar.month.SimpleMonthView
 
 
 internal class SimpleCalendarView @JvmOverloads constructor(
@@ -21,17 +22,17 @@ internal class SimpleCalendarView @JvmOverloads constructor(
     init {
         layoutParams = LayoutParams(
             LayoutParams.MATCH_PARENT,
-            LayoutParams.WRAP_CONTENT
+            LayoutParams.MATCH_PARENT
         )
         orientation = VERTICAL
         addView(textYear())
         addView(textMonth())
-        addView(monthView())
+        addView(calendarView())
     }
 
-    private fun textYear(): View {
+    private fun textYear(): TextView {
         return TextView(context).apply {
-            id = R.id.month_view_text_year
+            id = R.id.calendar_view_text_year
             val params = LayoutParams(
                 LayoutParams.MATCH_PARENT,
                 LayoutParams.WRAP_CONTENT
@@ -51,9 +52,9 @@ internal class SimpleCalendarView @JvmOverloads constructor(
         }
     }
 
-    private fun textMonth(): View {
+    private fun textMonth(): TextView {
         return TextView(context).apply {
-            id = R.id.month_view_text_month_name
+            id = R.id.calendar_view_text_month_name
             val params = LayoutParams(
                 LayoutParams.MATCH_PARENT,
                 LayoutParams.WRAP_CONTENT
@@ -73,12 +74,12 @@ internal class SimpleCalendarView @JvmOverloads constructor(
         }
     }
 
-    private fun monthView(): View {
-        return LinearLayout(context).apply {
-            id = R.id.month_view
+    private fun calendarView(): SimpleMonthView {
+        return SimpleMonthView(context).apply {
+            id = R.id.calendar_view
             val params = LayoutParams(
                 LayoutParams.MATCH_PARENT,
-                LayoutParams.WRAP_CONTENT
+                ViewUtil.getDayViewWidthSize(context) * 6
             )
             layoutParams = params
         }

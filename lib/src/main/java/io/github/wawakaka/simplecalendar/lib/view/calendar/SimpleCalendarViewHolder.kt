@@ -4,20 +4,22 @@ import android.view.View
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import io.github.wawakaka.simplecalendar.lib.R
+import io.github.wawakaka.simplecalendar.lib.data.SimpleDateData
 import io.github.wawakaka.simplecalendar.lib.data.SimpleMode
 import io.github.wawakaka.simplecalendar.lib.data.SimpleMonthData
 import io.github.wawakaka.simplecalendar.lib.utils.LocalDateUtil
+import io.github.wawakaka.simplecalendar.lib.view.calendar.month.SimpleMonthView
 
 internal class SimpleCalendarViewHolder(
     itemView: View,
     @SimpleMode
     private val mode: Int,
-    private val clickListener: ((Int, Int) -> Unit)?
+    private val clickListener: ((SimpleDateData) -> Unit)?
 ) : RecyclerView.ViewHolder(itemView) {
 
-    private val textYear = itemView.findViewById<TextView>(R.id.month_view_text_year)
-    private val textMonth = itemView.findViewById<TextView>(R.id.month_view_text_month_name)
-    private val monthView = itemView.findViewById<RecyclerView>(R.id.month_view)
+    private val textYear = itemView.findViewById<TextView>(R.id.calendar_view_text_year)
+    private val textMonth = itemView.findViewById<TextView>(R.id.calendar_view_text_month_name)
+    private val calendarView = itemView.findViewById<SimpleMonthView>(R.id.calendar_view)
 
     fun bindViews(
         data: SimpleMonthData
@@ -41,7 +43,7 @@ internal class SimpleCalendarViewHolder(
     }
 
     private fun setMonth(data: SimpleMonthData) {
-
+        calendarView.init(data, clickListener)
     }
 
 }
