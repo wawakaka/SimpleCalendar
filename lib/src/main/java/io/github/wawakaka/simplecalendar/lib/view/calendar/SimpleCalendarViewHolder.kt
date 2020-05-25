@@ -14,7 +14,7 @@ internal class SimpleCalendarViewHolder(
     itemView: View,
     @SimpleMode
     private val mode: Int,
-    private val clickListener: ((SimpleDateData) -> Unit)?
+    private val clickListener: ((SimpleDateData, SimpleMonthData) -> Unit)?
 ) : RecyclerView.ViewHolder(itemView) {
 
     private val textYear = itemView.findViewById<TextView>(R.id.calendar_view_text_year)

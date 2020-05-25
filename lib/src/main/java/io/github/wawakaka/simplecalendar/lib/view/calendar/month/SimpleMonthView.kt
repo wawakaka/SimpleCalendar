@@ -28,15 +28,16 @@ class SimpleMonthView @JvmOverloads constructor(
     }
 
     fun init(
-        data: SimpleMonthData,
-        clickListener: ((SimpleDateData) -> Unit)?
+        monthData: SimpleMonthData,
+        clickListener: ((SimpleDateData, SimpleMonthData) -> Unit)?
     ) {
         removeAllViews()
-        val numberOfWeeks = LocalDateUtil.countNumberOfWeekInAMonth(data.dateData.first().day)
+        val numberOfWeeks = LocalDateUtil.countNumberOfWeekInAMonth(monthData.dateData.first().day)
         for (week in 1..numberOfWeeks) {
             createRow(
                 week,
-                LocalDateUtil.getListOfDataInWeekOfMonth(week, data.dateData),
+                LocalDateUtil.getListOfDataInWeekOfMonth(week, monthData.dateData),
+                monthData,
                 clickListener
             )
         }
@@ -45,7 +46,8 @@ class SimpleMonthView @JvmOverloads constructor(
     private fun createRow(
         week: Int,
         dateData: MutableList<SimpleDateData>,
-        clickListener: ((SimpleDateData) -> Unit)?
+        monthData: SimpleMonthData,
+        clickListener: ((SimpleDateData, SimpleMonthData) -> Unit)?
     ) {
         addView(
             LinearLayout(context).apply {
@@ -60,7 +62,7 @@ class SimpleMonthView @JvmOverloads constructor(
                 }
                 orientation = HORIZONTAL
                 layoutParams = params
-                addColumns(this, dateData, clickListener)
+                addColumns(this, dateData, monthData, clickListener)
             }
         )
     }
@@ -68,7 +70,8 @@ class SimpleMonthView @JvmOverloads constructor(
     private fun addColumns(
         parent: LinearLayout,
         data: MutableList<SimpleDateData>,
-        clickListener: ((SimpleDateData) -> Unit)?
+        monthData: SimpleMonthData,
+        clickListener: ((SimpleDateData, SimpleMonthData) -> Unit)?
     ) {
         for (index in 0 until data.size) {
             parent.addView(
@@ -85,13 +88,7 @@ class SimpleMonthView @JvmOverloads constructor(
                     setTextColor(dateData, textView)
                     setViewState(dateData, container)
                     setOnClickListener {
-                        dateData.stateOnSingleMode =
-                            if (dateData.stateOnSingleMode == SimpleViewStates.NORMAL) {
-                                SimpleViewStates.SELECTED
-                            } else {
-                                SimpleViewStates.NORMAL
-                            }
-                        clickListener?.invoke(dateData)
+                        clickListener?.invoke(dateData, monthData)
                     }
                 }
             )

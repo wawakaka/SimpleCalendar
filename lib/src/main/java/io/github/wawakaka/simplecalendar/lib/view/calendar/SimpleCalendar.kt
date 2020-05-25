@@ -9,9 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import io.github.wawakaka.simplecalendar.lib.R
-import io.github.wawakaka.simplecalendar.lib.data.SimpleMode
-import io.github.wawakaka.simplecalendar.lib.data.SimpleModes
-import io.github.wawakaka.simplecalendar.lib.data.SimpleViewStates
+import io.github.wawakaka.simplecalendar.lib.data.*
 import io.github.wawakaka.simplecalendar.lib.utils.EndlessRecyclerViewScrollListener
 import io.github.wawakaka.simplecalendar.lib.utils.LocalDateUtil
 import net.danlew.android.joda.JodaTimeAndroid
@@ -28,6 +26,7 @@ class SimpleCalendar @JvmOverloads constructor(
     private lateinit var linearLayoutManager: LinearLayoutManager
     private lateinit var scrollListener: EndlessRecyclerViewScrollListener
     private var mode: Int = SimpleModes.SINGLE
+    private var temp: Pair<SimpleMonthData, SimpleDateData>? = null
 
     init {
         JodaTimeAndroid.init(context)
@@ -76,9 +75,35 @@ class SimpleCalendar @JvmOverloads constructor(
         }
         adapter.apply {
             initData(LocalDate.now(DateTimeZone.forID("Asia/Jakarta")))
-            clickListener = { clickListenerData ->
-                notifyDataSetChanged()
+            clickListener = { clickListenerData, monthData ->
+
+                // clearing the old states
+                temp?.let { pair ->
+                    val oldIndex = data.indexOf(data.find { it.id == pair.first.id })
+                    if (pair.second != clickListenerData)
+                        pair.second.stateOnSingleMode = SimpleViewStates.NORMAL
+                    notifyItemChanged(oldIndex)
+                }
+
+                // updating the states
+                val index = data.indexOf(data.find { it.id == monthData.id })
+
+                clickListenerData.stateOnSingleMode =
+                    if (clickListenerData.stateOnSingleMode == SimpleViewStates.SELECTED) {
+                        SimpleViewStates.NORMAL
+                    } else {
+                        SimpleViewStates.SELECTED
+                    }
+
+                // add the changes
+                temp = Pair(monthData, clickListenerData)
+
+                // update the adapter
+                notifyItemChanged(index)
                 Log.e("SimpleCalendar", "adapter.data : ${adapter.data}")
+            }
+            bindingDataListener = {
+                scrollListener.disableLoading()
             }
         }
 
@@ -86,6 +111,6 @@ class SimpleCalendar @JvmOverloads constructor(
     }
 
     private fun scrollToInitialPosition() {
-//        linearLayoutManager.scrollToPosition(LocalDateUtil.getCurrentMonthValue() - 1)
+        linearLayoutManager.scrollToPosition(LocalDateUtil.getCurrentMonthValue() - 1)
     }
 }

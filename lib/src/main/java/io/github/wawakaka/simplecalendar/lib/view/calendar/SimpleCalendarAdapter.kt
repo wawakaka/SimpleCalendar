@@ -15,7 +15,8 @@ internal class SimpleCalendarAdapter(@SimpleMode private val mode: Int) :
     RecyclerView.Adapter<SimpleCalendarViewHolder>() {
 
     var data = mutableListOf<SimpleMonthData>()
-    var clickListener: ((SimpleDateData) -> Unit)? = null
+    var clickListener: ((SimpleDateData, SimpleMonthData) -> Unit)? = null
+    var bindingDataListener: (() -> Unit)? = null
 
     init {
         setHasStableIds(true)
@@ -69,6 +70,7 @@ internal class SimpleCalendarAdapter(@SimpleMode private val mode: Int) :
     override fun onBindViewHolder(holder: SimpleCalendarViewHolder, position: Int) {
         if (position != NO_POSITION) {
             holder.bindViews(data = data[position])
+            bindingDataListener?.invoke()
         }
     }
 
@@ -80,6 +82,7 @@ internal class SimpleCalendarAdapter(@SimpleMode private val mode: Int) :
         if (position != NO_POSITION && payloads.isNullOrEmpty().not()) {
             Log.e("SimpleMonthAdapter", "Payloads: $payloads")
             holder.bindPayload(data[position])
+            bindingDataListener?.invoke()
         }
         super.onBindViewHolder(holder, position, payloads)
     }
