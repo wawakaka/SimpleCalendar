@@ -1,9 +1,9 @@
 package io.github.wawakaka.simplecalendar.lib.view.calendar.month
 
 import android.content.Context
-import android.graphics.Color
 import android.util.AttributeSet
 import android.util.Log
+import android.view.Gravity
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -14,7 +14,6 @@ import io.github.wawakaka.simplecalendar.lib.data.SimpleModes
 import io.github.wawakaka.simplecalendar.lib.data.SimpleMonthData
 import io.github.wawakaka.simplecalendar.lib.data.SimpleViewStates
 import io.github.wawakaka.simplecalendar.lib.utils.LocalDateUtil
-import io.github.wawakaka.simplecalendar.lib.utils.SimpleConstant.NUMBER_OF_DAYS_IN_ONE_WEEK
 import io.github.wawakaka.simplecalendar.lib.utils.ViewUtil
 import io.github.wawakaka.simplecalendar.lib.view.calendar.day.SimpleDayView
 
@@ -33,42 +32,37 @@ class SimpleMonthView @JvmOverloads constructor(
         clickListener: ((SimpleDateData) -> Unit)?
     ) {
         removeAllViews()
-        when (data.dateData.size) {
-            28 -> addRows(4, data, clickListener)
-            35 -> addRows(5, data, clickListener)
-            42 -> addRows(6, data, clickListener)
-            else -> throw IllegalStateException("invalid size, size = ${data.dateData.size}")
-        }
-    }
-
-    private fun addRows(
-        numberOfRow: Int, data: SimpleMonthData,
-        clickListener: ((SimpleDateData) -> Unit)?
-    ) {
-        for (row in 1..numberOfRow) {
-            createRow(data.dateData.subList((row - 1) * 7, row * 7), clickListener)
+        val numberOfWeeks = LocalDateUtil.countNumberOfWeekInAMonth(data.dateData.first().day)
+        for (week in 1..numberOfWeeks) {
+            createRow(
+                week,
+                LocalDateUtil.getListOfDataInWeekOfMonth(week, data.dateData),
+                clickListener
+            )
         }
     }
 
     private fun createRow(
+        week: Int,
         dateData: MutableList<SimpleDateData>,
         clickListener: ((SimpleDateData) -> Unit)?
     ) {
-        if (dateData.size == 7) {
-            addView(
-                LinearLayout(context).apply {
-                    val params = LayoutParams(
-                        LayoutParams.MATCH_PARENT,
-                        LayoutParams.WRAP_CONTENT
-                    )
-                    orientation = HORIZONTAL
-                    layoutParams = params
-                    addColumns(this, dateData, clickListener)
+        addView(
+            LinearLayout(context).apply {
+                val params = LayoutParams(
+                    LayoutParams.MATCH_PARENT,
+                    LayoutParams.WRAP_CONTENT
+                )
+                gravity = if (week == 1) {
+                    Gravity.END
+                } else {
+                    Gravity.START
                 }
-            )
-        } else {
-            throw IllegalStateException("invalid size to create row, size = ${dateData.size}")
-        }
+                orientation = HORIZONTAL
+                layoutParams = params
+                addColumns(this, dateData, clickListener)
+            }
+        )
     }
 
     private fun addColumns(
@@ -76,7 +70,7 @@ class SimpleMonthView @JvmOverloads constructor(
         data: MutableList<SimpleDateData>,
         clickListener: ((SimpleDateData) -> Unit)?
     ) {
-        for (index in 0 until NUMBER_OF_DAYS_IN_ONE_WEEK) {
+        for (index in 0 until data.size) {
             parent.addView(
                 SimpleDayView(context).apply {
                     val params = LayoutParams(
@@ -91,11 +85,12 @@ class SimpleMonthView @JvmOverloads constructor(
                     setTextColor(dateData, textView)
                     setViewState(dateData, container)
                     setOnClickListener {
-                        dateData.stateOnSingleMode = if (dateData.stateOnSingleMode == SimpleViewStates.NORMAL) {
-                            SimpleViewStates.SELECTED
-                        } else {
-                            SimpleViewStates.NORMAL
-                        }
+                        dateData.stateOnSingleMode =
+                            if (dateData.stateOnSingleMode == SimpleViewStates.NORMAL) {
+                                SimpleViewStates.SELECTED
+                            } else {
+                                SimpleViewStates.NORMAL
+                            }
                         clickListener?.invoke(dateData)
                     }
                 }
@@ -132,10 +127,10 @@ class SimpleMonthView @JvmOverloads constructor(
             SimpleModes.SINGLE -> {
                 when (dateData.stateOnSingleMode) {
                     SimpleViewStates.NORMAL -> {
-                        container.setBackgroundColor(ContextCompat.getColor(context,R.color.white))
+                        container.setBackgroundColor(ContextCompat.getColor(context, R.color.white))
                     }
                     SimpleViewStates.SELECTED -> {
-                        container.setBackgroundColor(ContextCompat.getColor(context,R.color.red))
+                        container.setBackgroundColor(ContextCompat.getColor(context, R.color.red))
                     }
                 }
             }

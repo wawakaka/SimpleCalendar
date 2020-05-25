@@ -30,7 +30,7 @@ internal class SimpleCalendarAdapter(@SimpleMode private val mode: Int) :
     }
 
     fun loadNextYear() {
-        val next = LocalDate.now(DateTimeZone.getDefault())
+        val next = LocalDate.now(DateTimeZone.forID("Asia/Jakarta"))
             .withMonthOfYear(data.last().month)
             .withYear(data.last().year)
             .plusYears(1)
@@ -39,7 +39,7 @@ internal class SimpleCalendarAdapter(@SimpleMode private val mode: Int) :
     }
 
     fun loadPreviousYear() {
-        val previous = LocalDate.now(DateTimeZone.getDefault())
+        val previous = LocalDate.now(DateTimeZone.forID("Asia/Jakarta"))
             .withMonthOfYear(data.first().month)
             .withYear(data.first().year)
             .minusYears(1)

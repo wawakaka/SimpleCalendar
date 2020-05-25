@@ -75,7 +75,7 @@ class SimpleCalendar @JvmOverloads constructor(
             PagerSnapHelper().attachToRecyclerView(this)
         }
         adapter.apply {
-            initData(LocalDate.now(DateTimeZone.getDefault()))
+            initData(LocalDate.now(DateTimeZone.forID("Asia/Jakarta")))
             clickListener = { clickListenerData ->
                 notifyDataSetChanged()
                 Log.e("SimpleCalendar", "adapter.data : ${adapter.data}")
