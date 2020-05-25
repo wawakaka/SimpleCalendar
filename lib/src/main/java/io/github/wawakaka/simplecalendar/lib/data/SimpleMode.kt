@@ -4,12 +4,12 @@ import androidx.annotation.IntDef
 
 @Retention(AnnotationRetention.SOURCE)
 @IntDef(
-    SimpleModes.NORMAL,
+    SimpleModes.SINGLE,
     SimpleModes.RANGED
 )
 internal annotation class SimpleMode
 
 internal object SimpleModes {
-    const val NORMAL = 0
+    const val SINGLE = 0
     const val RANGED = 1
 }

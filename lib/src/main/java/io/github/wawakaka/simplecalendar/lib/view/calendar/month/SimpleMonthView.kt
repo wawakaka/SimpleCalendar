@@ -2,86 +2,139 @@ package io.github.wawakaka.simplecalendar.lib.view.calendar.month
 
 import android.content.Context
 import android.util.AttributeSet
-import android.util.TypedValue
+import android.util.Log
 import android.view.Gravity
-import android.view.View
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.recyclerview.widget.RecyclerView
+import androidx.core.content.ContextCompat
 import io.github.wawakaka.simplecalendar.lib.R
-import io.github.wawakaka.simplecalendar.lib.extension.dpToPx
-import io.github.wawakaka.simplecalendar.lib.extension.setTextColorCompat
+import io.github.wawakaka.simplecalendar.lib.data.SimpleDateData
+import io.github.wawakaka.simplecalendar.lib.data.SimpleModes
+import io.github.wawakaka.simplecalendar.lib.data.SimpleMonthData
+import io.github.wawakaka.simplecalendar.lib.data.SimpleViewStates
+import io.github.wawakaka.simplecalendar.lib.utils.LocalDateUtil
+import io.github.wawakaka.simplecalendar.lib.utils.ViewUtil
+import io.github.wawakaka.simplecalendar.lib.view.calendar.day.SimpleDayView
 
-
-internal class SimpleMonthView @JvmOverloads constructor(
+class SimpleMonthView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr) {
-    // todo move all user configurable thing into global setter
+
     init {
-        layoutParams = LayoutParams(
-            LayoutParams.MATCH_PARENT,
-            LayoutParams.WRAP_CONTENT
-        )
         orientation = VERTICAL
-        addView(textYear())
-        addView(textMonth())
-        addView(recyclerViewDays())
     }
 
-    private fun textYear(): View {
-        return TextView(context).apply {
-            id = R.id.month_view_text_year
-            val params = LayoutParams(
-                LayoutParams.MATCH_PARENT,
-                LayoutParams.WRAP_CONTENT
+    fun init(
+        monthData: SimpleMonthData,
+        clickListener: ((SimpleDateData, SimpleMonthData) -> Unit)?
+    ) {
+        removeAllViews()
+        val numberOfWeeks = LocalDateUtil.countNumberOfWeekInAMonth(monthData.dateData.first().day)
+        for (week in 1..numberOfWeeks) {
+            createRow(
+                week,
+                LocalDateUtil.getListOfDataInWeekOfMonth(week, monthData.dateData),
+                monthData,
+                clickListener
             )
-            context?.let {
-                params.setMargins(
-                    it.dpToPx(16f),
-                    it.dpToPx(16f),
-                    it.dpToPx(16f),
-                    it.dpToPx(16f)
+        }
+    }
+
+    private fun createRow(
+        week: Int,
+        dateData: MutableList<SimpleDateData>,
+        monthData: SimpleMonthData,
+        clickListener: ((SimpleDateData, SimpleMonthData) -> Unit)?
+    ) {
+        addView(
+            LinearLayout(context).apply {
+                val params = LayoutParams(
+                    LayoutParams.MATCH_PARENT,
+                    LayoutParams.WRAP_CONTENT
                 )
+                gravity = if (week == 1) {
+                    Gravity.END
+                } else {
+                    Gravity.START
+                }
+                orientation = HORIZONTAL
+                layoutParams = params
+                addColumns(this, dateData, monthData, clickListener)
             }
-            layoutParams = params
-            gravity = Gravity.CENTER
-            setTextColorCompat(R.color.black)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f)
+        )
+    }
+
+    private fun addColumns(
+        parent: LinearLayout,
+        data: MutableList<SimpleDateData>,
+        monthData: SimpleMonthData,
+        clickListener: ((SimpleDateData, SimpleMonthData) -> Unit)?
+    ) {
+        for (index in 0 until data.size) {
+            parent.addView(
+                SimpleDayView(context).apply {
+                    val params = LayoutParams(
+                        ViewUtil.getDayViewWidthSize(context),
+                        ViewUtil.getDayViewWidthSize(context)
+                    )
+                    layoutParams = params
+                    val dateData = data[index]
+                    val container = findViewById<FrameLayout>(R.id.day_view_container)
+                    val textView = findViewById<TextView>(R.id.day_view_text_day)
+                    textView.text = LocalDateUtil.getDayText(dateData.day)
+                    setTextColor(dateData, textView)
+                    setViewState(dateData, container)
+                    setOnClickListener {
+                        clickListener?.invoke(dateData, monthData)
+                    }
+                }
+            )
         }
     }
 
-    private fun textMonth(): View {
-        return TextView(context).apply {
-            id = R.id.month_view_text_month_name
-            val params = LayoutParams(
-                LayoutParams.MATCH_PARENT,
-                LayoutParams.WRAP_CONTENT
-            )
-            context?.let {
-                params.setMargins(
-                    it.dpToPx(16f),
-                    it.dpToPx(16f),
-                    it.dpToPx(16f),
-                    it.dpToPx(16f)
+    private fun setTextColor(
+        dateData: SimpleDateData,
+        textView: TextView
+    ) {
+        if (dateData.day.monthOfYear != dateData.month) {
+            textView.setTextColor(
+                ContextCompat.getColor(
+                    context,
+                    R.color.disabled_day_color
                 )
-            }
-            layoutParams = params
-            gravity = Gravity.CENTER
-            setTextColorCompat(R.color.black)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f)
+            )
+        } else {
+            textView.setTextColor(
+                ContextCompat.getColor(
+                    context,
+                    R.color.default_day_color
+                )
+            )
         }
     }
 
-    private fun recyclerViewDays(): View {
-        return RecyclerView(context).apply {
-            id = R.id.month_view_recycler_days
-            val params = LayoutParams(
-                LayoutParams.MATCH_PARENT,
-                LayoutParams.WRAP_CONTENT
-            )
-            layoutParams = params
+    private fun setViewState(
+        dateData: SimpleDateData,
+        container: FrameLayout
+    ) {
+        when (dateData.mode) {
+            SimpleModes.SINGLE -> {
+                when (dateData.stateOnSingleMode) {
+                    SimpleViewStates.NORMAL -> {
+                        container.setBackgroundColor(ContextCompat.getColor(context, R.color.white))
+                    }
+                    SimpleViewStates.SELECTED -> {
+                        container.setBackgroundColor(ContextCompat.getColor(context, R.color.red))
+                    }
+                }
+            }
         }
+    }
+
+    fun findChildWithTag(tag: Int) {
+        Log.e("SimpleMonthView", "child count: $childCount")
     }
 }

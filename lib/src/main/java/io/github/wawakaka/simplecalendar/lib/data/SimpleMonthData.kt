@@ -2,9 +2,9 @@ package io.github.wawakaka.simplecalendar.lib.data
 
 import java.util.*
 
-internal class SimpleCalendarData(
+data class SimpleMonthData(
     val id: Int = UUID.randomUUID().toString().hashCode(),
     val year: Int,
     val month: Int,
-    val day: Int
+    val dateData: MutableList<SimpleDateData>
 )
